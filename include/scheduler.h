@@ -55,7 +55,16 @@ void schedule_start (void);
 
 /*
  * Schedule run function.  This function shall be called repeatedly from main.
+ * The function will execute the run function for the scheduled task.
  */
 void schedule_run (void);
+
+/*
+ * Timer tick callback function.  This function shall be called once for every
+ * tick (typically every ms).  The function will schedule the tasks that will
+ * be run when the schedule_run function is called.  Note that the timer tick
+ * function will not execute any code in the tasks.
+ */
+void schedule_timer_tick (void);
 
 #endif // BL_SCHEDULER_H
