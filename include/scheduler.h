@@ -23,6 +23,8 @@
 
 #include "config.h"
 
+#define SCHEDULE_INVALID_TASK_ID    (uint8_t)0xFF
+
 /*
  * Prototype for the task run function that is called by the scheduler.
  */
@@ -43,7 +45,10 @@ uint32_t schedule_get_overrun_tasks(void);
 
 /*
  * Function to add a new task to the scheduler.  The period, offset and the
- * run function must be provided.  The function returns the taskid.
+ * run function must be provided.  The function returns the taskid.  The taskid
+ * is a number between 0 and maximum number specified in the config file.
+ * Though, the absolute maximum is 32 (taskid 31).  SCHEDULE_INVALID_TASK_ID
+ * will be returned if the add function fails.
  */
 uint8_t schedule_add_task (uint8_t period, uint8_t offset,
                            task_run run_function);

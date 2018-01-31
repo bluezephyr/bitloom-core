@@ -36,6 +36,7 @@ void schedule_init (void)
 {
     overrun = 0;
     task_error = 0;
+    added_tasks = 0;
 }
 
 uint32_t schedule_get_overrun_tasks(void)
@@ -46,11 +47,18 @@ uint32_t schedule_get_overrun_tasks(void)
 uint8_t schedule_add_task (uint8_t period, uint8_t offset,
         task_run run_function)
 {
-    tasks[added_tasks].period = period;
-    tasks[added_tasks].offset = offset;
-    tasks[added_tasks].time = period + offset;
-    tasks[added_tasks].run = run_function;
-    return added_tasks++;
+    if(added_tasks < SCHEDULER_NO_TASKS)
+    {
+        tasks[added_tasks].period = period;
+        tasks[added_tasks].offset = offset;
+        tasks[added_tasks].time = period + offset;
+        tasks[added_tasks].run = run_function;
+        return added_tasks++;
+    }
+    else
+    {
+        return SCHEDULE_INVALID_TASK_ID;
+    }
 }
 
 void schedule_start (void)

@@ -4,6 +4,6 @@
 #include <stdint.h>
 
 // Defines for the scheduler
-#define SCHEDULER_NO_TASKS      5
+#define SCHEDULER_NO_TASKS      32
 
 #endif  // CONFIG_H
