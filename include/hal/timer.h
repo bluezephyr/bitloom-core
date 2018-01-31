@@ -12,7 +12,7 @@
 #define BL_HAL_TIMER_H
 
 void timer_init (void);
-void timer_enable_interrupts (void);
-void timer_disable_interrupts (void);
+void timer_start (void);
+void timer_stop (void);
 
 #endif // BL_HAL_TIMER_H

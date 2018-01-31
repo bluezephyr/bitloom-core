@@ -1,23 +1,15 @@
 /*
  * Simple non-preemptive scheduler for BitLoom.
  *
- * The scheduler uses a timer to get a tick every ms and this tick is used
- * to schedule tasks.  Each task has a period (in ticks) and an offset.
+ * The scheduler uses a timer to get a tick (typically) every ms and this tick
+ * is used to schedule tasks.  Each task has a period (in ticks) and an offset.
  * The period and the offset must be set so that only one task is run each
- * tick.  The scheduled task must return before the next tick (this is
- * monitored by an overrun flag).  Note that the overrun variable is scheduler
- * internal and must not be read from outside.  If a task overruns, the
- * corresponding bit in the 'task_error' variable is set (i.e., the task id
- * bit).  The 'task_error' variable can be read from other modules.
- *
- * Each task must implement a run function that will be called by the
- * scheduler.
+ * tick.  Each task must implement a run function that will be called by the
+ * scheduler.  The run function must return before the next tick and failure
+ * to do this will generate an error.
  *
  * The scheduler requires a config.h file with the following defines:
  *  * SCHEDULER_NO_TASKS - Number of tasks in the application (max 32)
- *
- * The scheduler also requires a HAL (Hardware Abstraction Layer) that
- * implements the lower layer functions on the actual target hardware.
  *
  * Copyright (c) 2016-2018 BlueZephyr
  *
@@ -32,14 +24,22 @@
 #include "config.h"
 
 /*
- * Init the scheduler.
+ * Prototype for the task run function that is called by the scheduler.
+ */
+typedef void (*task_run)(void);
+
+/*
+ * Init the scheduler.  This function must be called before any other function
+ * is used.
  */
 void schedule_init (void);
 
 /*
- * Prototype for the task run function that is called by the scheduler.
+ * This function will return a bit field of all tasks that have overrun.  The
+ * corresponding task's id in the returned value will be set if the task has
+ * overrun during the execution so far.
  */
-typedef void (*task_run)(void);
+uint32_t schedule_get_overrun_tasks(void);
 
 /*
  * Function to add a new task to the scheduler.  The period, offset and the
@@ -49,15 +49,10 @@ uint8_t schedule_add_task (uint8_t period, uint8_t offset,
                            task_run run_function);
 
 /*
- * Start the scheduler.
+ * Start the scheduler.  The scheduler expects that the timer has been
+ * configured and initiated.
  */
 void schedule_start (void);
-
-/*
- * Schedule run function.  This function shall be called repeatedly from main.
- * The function will execute the run function for the scheduled task.
- */
-void schedule_run (void);
 
 /*
  * Timer tick callback function.  This function shall be called once for every
@@ -66,5 +61,11 @@ void schedule_run (void);
  * function will not execute any code in the tasks.
  */
 void schedule_timer_tick (void);
+
+/*
+ * Schedule run function.  This function shall be called repeatedly from main.
+ * The function will execute the run function for the scheduled task.
+ */
+void schedule_run (void);
 
 #endif // BL_SCHEDULER_H

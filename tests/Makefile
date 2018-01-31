@@ -9,6 +9,7 @@ ROOT   := ../
 SRC    := src/scheduler/scheduler.c \
           tests/mocks/fake_timer.c \
           tests/scheduler/test_scheduler.c \
+          tests/scheduler/test_fake_timer.c \
           tests/test_main.c
 
 
@@ -70,7 +71,7 @@ clean:
 #			TEST
 #-----------------------------------------------------------------------------#
 test:	$(NAME)
-	./$(NAME)
+	./$(NAME) -v
 
 #-----------------------------------------------------------------------------#
 #			DEBUG

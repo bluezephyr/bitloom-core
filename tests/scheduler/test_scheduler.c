@@ -10,22 +10,37 @@
 
 #include "unity_fixture.h"
 #include "scheduler.h"
+#include "fake_timer.h"
 
 TEST_GROUP(scheduler);
 TEST_GROUP_RUNNER(scheduler)
 {
-    RUN_TEST_CASE(scheduler, Init);
+    RUN_TEST_CASE(scheduler, init);
+    RUN_TEST_CASE(scheduler, no_start_no_timer_started);
+    RUN_TEST_CASE(scheduler, start_with_no_tasks);
 }
 
 TEST_SETUP(scheduler)
 {
+    schedule_init();
 }
 
 TEST_TEAR_DOWN(scheduler)
 {
 }
 
-TEST(scheduler, Init)
+TEST(scheduler, init)
 {
-    TEST_FAIL_MESSAGE("First test case");
+    TEST_ASSERT_EQUAL_UINT32(0, schedule_get_overrun_tasks());
+}
+
+TEST(scheduler, no_start_no_timer_started)
+{
+    TEST_ASSERT_EQUAL_INT(TIMER_DISABLED, faketimer_get_state());
+}
+
+TEST(scheduler, start_with_no_tasks)
+{
+    schedule_start();
+    TEST_ASSERT_EQUAL_INT(TIMER_ENABLED, faketimer_get_state());
 }

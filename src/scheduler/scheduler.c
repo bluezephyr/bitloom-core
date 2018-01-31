@@ -1,5 +1,5 @@
 /*
- * BitLoom Scheduler - Simple non-preemptive scheduler
+ * BitLoom Scheduler - Simple non-preemptive scheduler for up to 32 tasks.
  *
  * Copyright (c) 2016-2018. BlueZephyr
  *
@@ -15,27 +15,56 @@
 typedef struct Task_t
 {
     uint8_t period;
-    uint8_t offset;
+    uint8_t offset;  // TODO: Is this needed?
     uint8_t time;
     task_run run;   // The task's run function
 } Task_t;
 
-volatile Task_t tasks[SCHEDULER_NO_TASKS];
-volatile uint8_t added_tasks = 0;
-
-// Corresponding bit in the overrun flag is set if a task exceeds the maximum
-// execution time. Note! The overrun flag is module internal. The task_error
-// flag can be READ by other modules.
-volatile uint32_t overrun;
-volatile uint32_t task_error;
+static volatile Task_t tasks[SCHEDULER_NO_TASKS];
+static volatile uint8_t added_tasks = 0;
 
 /*
- * Callback that updates the task timers. Should be called once per ms (using
- * interrupts).  Each task timer will be decreased with 1.  The scheduler's
- * main function will execute the task when the timer reaches 0 and reset the
- * timer.
+ * Corresponding bit in the overrun flag is set if a task exceeds the maximum
+ * execution time.  The task_error variable holds the id:s of all tasks that
+ * have overrun.
  */
-void TIMER_CALLBACK (void)
+static volatile uint32_t overrun;
+static volatile uint32_t task_error;
+
+
+void schedule_init (void)
+{
+    overrun = 0;
+    task_error = 0;
+}
+
+uint32_t schedule_get_overrun_tasks(void)
+{
+    return task_error;
+}
+
+uint8_t schedule_add_task (uint8_t period, uint8_t offset,
+        task_run run_function)
+{
+    tasks[added_tasks].period = period;
+    tasks[added_tasks].offset = offset;
+    tasks[added_tasks].time = period + offset;
+    tasks[added_tasks].run = run_function;
+    return added_tasks++;
+}
+
+void schedule_start (void)
+{
+    timer_start();
+}
+
+/*
+ * Callback that updates the task timers.  Typically, this is called once per
+ * ms or similar by a timer interrupt.  Each task timer will be decreased by 1.
+ * The scheduler's main function will execute the task when the timer reaches 0
+ * and reset the task's timer.
+ */
+void schedule_timer_tick (void)
 {
     uint8_t i;
 
@@ -55,29 +84,7 @@ void TIMER_CALLBACK (void)
     }
 }
 
-void schedule_init (void)
-{
-    timer_init ();
-    overrun = 0;
-    task_error = 0;
-}
-
-uint8_t schedule_add_task (uint8_t period, uint8_t offset,
-        task_run run_function)
-{
-    tasks[added_tasks].period = period;
-    tasks[added_tasks].offset = offset;
-    tasks[added_tasks].time = period + offset;
-    tasks[added_tasks].run = run_function;
-    return added_tasks++;
-}
-
-void schedule_start (void)
-{
-    timer_enable_interrupts();
-}
-
-inline void schedule_run (void)
+void schedule_run (void)
 {
     uint8_t task;
 
@@ -92,3 +99,4 @@ inline void schedule_run (void)
         }
     }
 }
+

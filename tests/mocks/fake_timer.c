@@ -12,24 +12,34 @@
  *
  */
 
-#include "timer.h"
+#include "fake_timer.h"
+
+static int m_state;
 
 /*
  * Implementation of the timer interface
  */
 void timer_init (void)
 {
+    m_state = TIMER_DISABLED;
 }
 
-void timer_enable_interrupts (void)
+void timer_start (void)
 {
+    m_state = TIMER_ENABLED;
 }
 
-void timer_disable_interrupts (void)
+void timer_stop (void)
 {
+    m_state = TIMER_DISABLED;
 }
 
 
 /*
  * Functions to control the fake timer
  */
+
+int faketimer_get_state (void)
+{
+    return m_state;
+}
