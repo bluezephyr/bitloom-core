@@ -3,10 +3,9 @@
  *
  * The scheduler uses a timer to get a tick (typically) every ms and this tick
  * is used to schedule tasks.  Each task has a period (in ticks) and an offset.
- * The period and the offset must be set so that only one task is run each
- * tick.  Each task must implement a run function that will be called by the
- * scheduler.  The run function must return before the next tick and failure
- * to do this will generate an error.
+ * Each task must implement a run function that will be called by the scheduler.
+ * The run functions that are executed within one tick must return before the
+ * next tick.  Failure to do this will generate an error.
  *
  * The scheduler requires a config.h file with the following defines:
  *  * SCHEDULER_NO_TASKS - Number of tasks in the application (max 32)

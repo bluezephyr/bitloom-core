@@ -7,8 +7,10 @@ ROOT   := ../
 
 # Source files (relative to ROOT)
 SRC    := src/scheduler/scheduler.c \
+	  tests/mocks/spy_task.c \
           tests/mocks/fake_timer.c \
           tests/scheduler/test_scheduler.c \
+          tests/scheduler/test_spy_task.c \
           tests/scheduler/test_fake_timer.c \
           tests/test_main.c
 
