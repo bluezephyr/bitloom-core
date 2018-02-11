@@ -15,7 +15,6 @@
 
 /*
  * Tests to be written:
- * - One task. Overrun - report error
  * - Many tasks. Tick and schedule_run -> no action
  * - Many tasks. Tick and schedule_run -> tasks run
  */
@@ -34,6 +33,7 @@ TEST_GROUP_RUNNER(scheduler)
     RUN_TEST_CASE(scheduler, schedule_one_task_scheduled_once);
     RUN_TEST_CASE(scheduler, schedule_one_task_scheduled_many);
     RUN_TEST_CASE(scheduler, schedule_one_task_scheduled_many_offset_one);
+    RUN_TEST_CASE(scheduler, schedule_one_task_overrun);
 }
 
 TEST_SETUP(scheduler)
@@ -68,6 +68,10 @@ void start_tick_run(uint32_t no_of_times)
     }
 }
 
+void ticker_function(void)
+{
+    schedule_timer_tick();
+}
 
 /*
  * TEST CASES
@@ -146,4 +150,13 @@ TEST(scheduler, schedule_one_task_scheduled_many_offset_one)
     schedule_add_task(task.period, task.offset, task.run);
     start_tick_run(6);
     TEST_ASSERT_EQUAL_INT(2, spytask_get_no_of_runs());
+}
+
+TEST(scheduler, schedule_one_task_overrun)
+{
+    uint8_t task_id;
+    SpyTask_t task = spytask_create_overrun_task(1, 0, ticker_function);
+    task_id = schedule_add_task(task.period, task.offset, task.run);
+    start_tick_run(1);
+    TEST_ASSERT_EQUAL_UINT32(1 << task_id, schedule_get_overrun_tasks());
 }

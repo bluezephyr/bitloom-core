@@ -40,3 +40,8 @@ uint32_t spytask_get_no_of_runs(void)
 {
     return m_task_no_of_runs;
 }
+
+SpyTask_t spytask_create_overrun_task(uint8_t period, uint8_t offset, task_run run_function)
+{
+    return spytask_create(period, offset, run_function);
+}

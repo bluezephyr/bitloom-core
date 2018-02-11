@@ -23,6 +23,7 @@ typedef struct
 
 SpyTask_t spytask_create(uint8_t period, uint8_t offset, task_run run_function);
 SpyTask_t spytask_create_counter_task(uint8_t period, uint8_t offset);
+SpyTask_t spytask_create_overrun_task(uint8_t period, uint8_t offset, task_run run_function);
 
 uint32_t spytask_get_no_of_runs(void);
 
