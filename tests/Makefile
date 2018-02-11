@@ -6,13 +6,13 @@ NAME   := bitloom_unittests
 ROOT   := ../
 
 # Source files (relative to ROOT)
-SRC    := src/scheduler/scheduler.c \
-	  tests/mocks/spy_task.c \
-          tests/mocks/fake_timer.c \
-          tests/scheduler/test_scheduler.c \
-          tests/scheduler/test_spy_task.c \
-          tests/scheduler/test_fake_timer.c \
-          tests/test_main.c
+SRC    := scheduler.c \
+	  spy_task.c \
+          fake_timer.c \
+          test_scheduler.c \
+          test_spy_task.c \
+          test_fake_timer.c \
+          test_main.c
 
 
 # Include directories (relative to ROOT)
@@ -38,8 +38,7 @@ UNITY_I	:= $(UNITY_HOME)/src \
 	   $(UNITY_HOME)/extras/fixture/test \
 
 # Unity source
-UNITY_S := $(UNITY_HOME)/src/unity.c \
-	   $(UNITY_HOME)/extras/fixture/src/unity_fixture.c
+UNITY_S := unity.c unity_fixture.c
 
 #-----------------------------------------------------------------------------#
 #			MAKEFILE CORE
@@ -52,12 +51,15 @@ INC_P   = $(addprefix $(ROOT), $(INC))
 INC_L   = $(foreach d, $(INC_P), -I$(d))
 INC_AL  = $(foreach d, $(INC_A), -I$(d))
 INC_U	= $(foreach d, $(UNITY_I), -I$(d))
-OBJ     = $(SRC_P:.c=.o) $(UNITY_S:.c=.o)
+OBJ     = $(SRC:.c=.o) $(UNITY_S:.c=.o)
 
 CFLAGS  := -Wall -g3 -I. $(INC_L) $(INC_AL) $(INC_U)
 LDFLAGS :=
 
 all: 	test
+
+VPATH = $(UNITY_HOME)/src $(UNITY_HOME)/extras/fixture/src\
+          ../src/scheduler mocks scheduler
 
 $(NAME) : $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
@@ -89,3 +91,5 @@ debug:
 	@echo "OBJ_U   : " $(OBJ_U)
 	@echo "CFLAGS  : " $(CFLAGS)
 	@echo "LDFLAGS : " $(LDFLAGS)
+	@echo "VPATH   : " $(VPATH)
+	@echo "CURDIR  : " $(CURDIR)
