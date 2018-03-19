@@ -10,12 +10,10 @@
 
 #include "timer.h"
 #include "scheduler.h"
-#include "config.h"
 
 typedef struct Task_t
 {
     uint8_t period;
-    uint8_t offset;  // TODO: Is this needed?
     uint8_t time;
     task_run run;   // The task's run function
 } Task_t;
@@ -50,7 +48,6 @@ uint8_t schedule_add_task (uint8_t period, uint8_t offset,
     if(added_tasks < SCHEDULER_NO_TASKS)
     {
         tasks[added_tasks].period = period;
-        tasks[added_tasks].offset = offset;
         tasks[added_tasks].time = period + offset;
         tasks[added_tasks].run = run_function;
         return added_tasks++;

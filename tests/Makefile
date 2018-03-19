@@ -18,6 +18,7 @@ SRC    := scheduler.c \
 # Include directories (relative to ROOT)
 INC    := include \
 	  include/hal \
+	  tests/config \
 	  tests/mocks
 
 
