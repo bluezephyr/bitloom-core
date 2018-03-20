@@ -5,17 +5,17 @@
 NAME   := bitloom_unittests
 ROOT   := ../
 
-# Source files (relative to ROOT)
 SRC    := scheduler.c \
 	  spy_task.c \
           fake_timer.c \
           test_scheduler.c \
+	  test_i2c_master.c \
           test_spy_task.c \
           test_fake_timer.c \
           test_main.c
 
 
-# Include directories (relative to ROOT)
+# Include directories
 INC    := include \
 	  include/hal \
 	  tests/config \
@@ -60,7 +60,11 @@ LDFLAGS :=
 all: 	test
 
 VPATH = $(UNITY_HOME)/src $(UNITY_HOME)/extras/fixture/src\
-          ../src/scheduler mocks scheduler
+          ../src/scheduler \
+	  ../src/i2c_master \
+	  mocks \
+	  scheduler \
+          i2c_master
 
 $(NAME) : $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
