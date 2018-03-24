@@ -28,6 +28,7 @@
 *.dylib
 
 # Executables
+bitloom_unittests
 *.exe
 *.out
 *.app

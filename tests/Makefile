@@ -8,6 +8,7 @@ ROOT   := ../
 SRC    := scheduler.c \
 	  spy_task.c \
           fake_timer.c \
+	  i2c_master.c \
           test_scheduler.c \
 	  test_i2c_master.c \
           test_spy_task.c \
