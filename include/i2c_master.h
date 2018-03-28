@@ -60,7 +60,7 @@ i2c_master_state_t i2c_master_get_state (void);
  * be done by the run functions (executed by the scheduler).  When the
  * operation has completed, the driver state is set to idle.  It is important
  * that the provided data buffers are not modified by the application until the
- * operation has completed. 
+ * operation has completed.
  *
  * Note that if the driver will ignore any requests if it is not in the idle
  * state.  In that case, no data will be copied.

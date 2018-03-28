@@ -73,6 +73,6 @@ i2c_result_t i2c_write_byte (uint8_t byte);
  * The bus must have been started and the device should have been set in read
  * mode before the functions can be used.
  */
-i2c_result_t i2c_read_byte_ack (uint8_t* byte, uint8_t send_ack);
+i2c_result_t i2c_read_byte (uint8_t* byte, uint8_t send_ack);
 
 #endif // BL_HAL_I2C_H

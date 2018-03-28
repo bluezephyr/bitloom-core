@@ -6,9 +6,10 @@ NAME   := bitloom_unittests
 ROOT   := ../
 
 SRC    := scheduler.c \
+	  i2c_master.c \
 	  spy_task.c \
           fake_timer.c \
-	  i2c_master.c \
+	  i2c_mock.c \
           test_scheduler.c \
 	  test_i2c_master.c \
           test_spy_task.c \

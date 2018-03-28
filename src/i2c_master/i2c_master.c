@@ -113,5 +113,61 @@ void i2c_master_write (uint8_t address, uint8_t* buffer, uint16_t len)
 
 void i2c_master_run (void)
 {
+    uint8_t bytes_this_tick = 0;
+    i2c_result_t result;
 
+    while (bytes_this_tick < I2C_BYTES_PER_TICK)
+    {
+        switch (m_state)
+        {
+            case idle_state:
+                // Nothing to do
+                return;
+
+            case start_state:
+                result = i2c_start();
+                if (result == i2c_ok)
+                {
+                    if (m_operation_type == write_op)
+                    {
+                        result = i2c_write_byte(m_slave_address);
+                        m_state = write_data_state;
+                    }
+                }
+                break;
+
+            case write_data_state:
+                result = i2c_write_byte (m_buffer[m_handled_bytes++]);
+
+                if (m_handled_bytes == m_buffer_len)
+                {
+                    // All bytes written -- stop
+                    m_state = stop_state;
+                }
+                break;
+
+            case stop_state:
+                /*
+                 * Stop the I2C communication and inform the user that the operation has
+                 * finished. Set the I2C module in idle to allow for next operation.
+                 */
+                m_state = idle_state;
+                i2c_stop();
+                break;
+
+            case error_state:
+                /*
+                 * This should not happen
+                 */
+                break;
+        }
+        bytes_this_tick++;
+
+        // Stop and return
+        if ((result == i2c_arbitration_lost) ||
+            (result == i2c_operation_error))
+        {
+            m_state = error_state;
+        }
+    }
 }
