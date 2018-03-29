@@ -48,32 +48,41 @@ typedef enum
 
 
 /*
- * I2C master state variables
+ * I2C master class (singleton)
  */
-static i2c_operation_state_t m_state;
-static i2c_operation_t m_operation_type;
-static uint8_t m_slave_address;
-static uint8_t m_read_register;
-static uint16_t m_handled_bytes;
-static uint8_t* m_buffer;
-static uint16_t m_buffer_len;
+typedef struct
+{
+    i2c_operation_state_t state;
+    i2c_operation_t operation;
+    uint8_t slave_address;
+    uint8_t read_register;
+    uint16_t handled_bytes;
+    uint8_t* buffer;
+    uint16_t buffer_len;
+} i2c_master_t;
+
+/*
+ * I2C Master object
+ */
+static i2c_master_t self;
+
 
 void i2c_master_init (uint8_t taskid)
 {
-    m_state = idle_state;
-    m_operation_type = write_op;
-    m_slave_address = 0;
-    m_read_register = 0;
-    m_handled_bytes = 0;
-    m_buffer = (uint8_t*)0;
-    m_buffer_len = 0;
+    self.state = idle_state;
+    self.operation = write_op;
+    self.slave_address = 0;
+    self.read_register = 0;
+    self.handled_bytes = 0;
+    self.buffer = (uint8_t*)0;
+    self.buffer_len = 0;
 }
 
 i2c_master_state_t i2c_master_get_state (void)
 {
     i2c_master_state_t state = i2c_error;
 
-    switch (m_state)
+    switch (self.state)
     {
         case idle_state:
             state = i2c_idle;
@@ -97,17 +106,17 @@ i2c_master_state_t i2c_master_get_state (void)
 
 void i2c_master_write (uint8_t address, uint8_t* buffer, uint16_t len)
 {
-    if (m_state == idle_state)
+    if (self.state == idle_state)
     {
         // Store the input data
-        m_slave_address = address;
-        m_buffer = buffer;
-        m_buffer_len = len;
+        self.slave_address = address;
+        self.buffer = buffer;
+        self.buffer_len = len;
 
         // Prepare write operation. Will be started next tick for the driver
-        m_state = start_state;
-        m_operation_type = write_op;
-        m_handled_bytes = 0;
+        self.state = start_state;
+        self.operation = write_op;
+        self.handled_bytes = 0;
     }
 }
 
@@ -118,7 +127,7 @@ void i2c_master_run (void)
 
     while (bytes_this_tick < I2C_BYTES_PER_TICK)
     {
-        switch (m_state)
+        switch (self.state)
         {
             case idle_state:
                 // Nothing to do
@@ -128,21 +137,21 @@ void i2c_master_run (void)
                 result = i2c_start();
                 if (result == i2c_ok)
                 {
-                    if (m_operation_type == write_op)
+                    if (self.operation == write_op)
                     {
-                        result = i2c_write_byte(m_slave_address);
-                        m_state = write_data_state;
+                        result = i2c_write_byte(self.slave_address);
+                        self.state = write_data_state;
                     }
                 }
                 break;
 
             case write_data_state:
-                result = i2c_write_byte (m_buffer[m_handled_bytes++]);
+                result = i2c_write_byte (self.buffer[self.handled_bytes++]);
 
-                if (m_handled_bytes == m_buffer_len)
+                if (self.handled_bytes == self.buffer_len)
                 {
                     // All bytes written -- stop
-                    m_state = stop_state;
+                    self.state = stop_state;
                 }
                 break;
 
@@ -151,10 +160,13 @@ void i2c_master_run (void)
                  * Stop the I2C communication and inform the user that the operation has
                  * finished. Set the I2C module in idle to allow for next operation.
                  */
-                m_state = idle_state;
+                self.state = idle_state;
                 i2c_stop();
                 break;
 
+            case write_register_state:
+            case restart_in_read_state:
+            case read_data_state:
             case error_state:
                 /*
                  * This should not happen
@@ -167,7 +179,7 @@ void i2c_master_run (void)
         if ((result == i2c_arbitration_lost) ||
             (result == i2c_operation_error))
         {
-            m_state = error_state;
+            self.state = error_state;
         }
     }
 }

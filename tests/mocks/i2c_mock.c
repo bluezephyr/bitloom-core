@@ -145,6 +145,7 @@ i2c_result_t i2c_write_byte (uint8_t byte)
 
 i2c_result_t i2c_read_byte (uint8_t* byte, uint8_t send_ack)
 {
+    return i2c_operation_error;
 }
 
 static void store_current_action(operation_t op, uint8_t data, uint8_t read_byte)
