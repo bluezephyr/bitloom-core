@@ -31,7 +31,8 @@ TEST_GROUP_RUNNER(i2c_master)
 {
     RUN_TEST_CASE(i2c_master, init);
     RUN_TEST_CASE(i2c_master, run_driver_idle);
-    RUN_TEST_CASE(i2c_master, write_request_sets_driver_in_start_state);
+    RUN_TEST_CASE(i2c_master, write_request_sets_driver_in_busy_state);
+    RUN_TEST_CASE(i2c_master, no_device_error);
     RUN_TEST_CASE(i2c_master, write_single_register_on_device);
 }
 
@@ -51,15 +52,14 @@ void check_driver_idle(void)
     TEST_ASSERT_EQUAL_INT(i2c_idle, i2c_master_get_state());
 }
 
-void run_until_idle(uint16_t max_number_of_loops)
+void run_until(i2c_master_state_t state, uint16_t max_number_of_loops)
 {
     uint16_t i;
-
-    while (i2c_master_get_state() != i2c_idle)
+    while (i2c_master_get_state() != state)
     {
         if (i++ == max_number_of_loops)
         {
-            TEST_FAIL_MESSAGE("Number of run loops exceeded");
+            TEST_FAIL_MESSAGE("Maximum number of run loops exceeded");
         }
         i2c_master_run();
     }
@@ -79,11 +79,24 @@ TEST(i2c_master, run_driver_idle)
     check_driver_idle();
 }
 
-TEST(i2c_master, write_request_sets_driver_in_start_state)
+TEST(i2c_master, write_request_sets_driver_in_busy_state)
 {
     i2c_master_write(0, NULL, 0);
     TEST_ASSERT_EQUAL_INT(i2c_busy, i2c_master_get_state());
 }
+
+TEST(i2c_master, no_device_error)
+{
+    uint8_t buffer[1] = {WRITE_REGISTER};
+    uint16_t buffer_len = 1;
+
+    i2c_mock_expect_start_then_return(i2c_ok);
+    i2c_mock_expect_write_byte_then_return(WRITE_ADDRESS, i2c_nack_received);
+    i2c_mock_expect_stop();
+    i2c_master_write(DEVICE_ADDRESS, buffer, buffer_len);
+    run_until(i2c_error, 10);
+    i2c_mock_verify_complete();
+} 
 
 TEST(i2c_master, write_single_register_on_device)
 {
@@ -96,6 +109,6 @@ TEST(i2c_master, write_single_register_on_device)
     i2c_mock_expect_write_byte_then_return(WRITE_DATA_BYTE_0, i2c_ok);
     i2c_mock_expect_stop();
     i2c_master_write(DEVICE_ADDRESS, buffer, buffer_len);
-    run_until_idle(10);
+    run_until(i2c_idle, 10);
     i2c_mock_verify_complete();
 }

@@ -46,7 +46,6 @@ typedef enum
     write_op
 } i2c_operation_t;
 
-
 /*
  * I2C master class (singleton)
  */
@@ -142,6 +141,11 @@ void i2c_master_run (void)
                         result = i2c_write_byte(self.slave_address);
                         self.state = write_data_state;
                     }
+                    if (result == i2c_nack_received)
+                    {
+                        // Slave not available
+                        self.state = error_state;
+                    }
                 }
                 break;
 
@@ -167,15 +171,17 @@ void i2c_master_run (void)
             case write_register_state:
             case restart_in_read_state:
             case read_data_state:
+                break;
+
             case error_state:
                 /*
-                 * This should not happen
+                 * Stop and return
                  */
-                break;
+                i2c_stop();
+                return;
         }
         bytes_this_tick++;
 
-        // Stop and return
         if ((result == i2c_arbitration_lost) ||
             (result == i2c_operation_error))
         {

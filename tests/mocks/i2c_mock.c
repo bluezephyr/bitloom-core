@@ -47,9 +47,22 @@ static action_t m_current_action;
  */
 static void store_expectation(operation_t op, i2c_result_t result, uint8_t data, uint8_t read_byte);
 static void store_current_action(operation_t op, uint8_t data, uint8_t read_byte);
+static void fail_when_operation_is_not_expected(void);
 static void fail_when(int condition, const char* message);
-static int operation_is_not_expected(void);
 static int data_is_not_expected(void);
+static int too_many_operations(void);
+static const char* get_operation_string(operation_t operation);
+
+/*
+ * Error output strings
+ */
+static const char* operation_string_start          = "start";
+static const char* operation_string_restart        = "restart";
+static const char* operation_string_stop           = "stop";
+static const char* operation_string_write_byte     = "write_byte";
+static const char* operation_string_read_byte_ack  = "read_byte_ack";
+static const char* operation_string_read_byte_nack = "read_byte_nack";
+static const char* operation_string_unknown        = "unknonw string";
 
 /*
  * Functions to control the mock.
@@ -113,34 +126,35 @@ static void store_expectation(operation_t op, i2c_result_t result, uint8_t data,
  */
 i2c_result_t i2c_start (void)
 {
+    fail_when(too_many_operations(), "Too many operations");
     store_current_action(start, 0, 0);
-    fail_when(operation_is_not_expected(), "Unexpected operation 'start'");
-    m_used_expectations++;
-    return m_expectations[m_used_expectations].result;
+    fail_when_operation_is_not_expected();
+    return m_expectations[m_used_expectations++].result;
 }
 
 i2c_result_t i2c_restart (void)
 {
+    fail_when(too_many_operations(), "Too many operations");
     store_current_action(restart, 0, 0);
-    fail_when(operation_is_not_expected(), "Unexpected operation 'restart'");
-    m_used_expectations++;
-    return m_expectations[m_used_expectations].result;
+    fail_when_operation_is_not_expected();
+    return m_expectations[m_used_expectations++].result;
 }
 
 void i2c_stop (void)
 {
+    fail_when(too_many_operations(), "Too many operations");
     store_current_action(stop, 0, 0);
-    fail_when(operation_is_not_expected(), "Unexpected operation 'stop'");
+    fail_when_operation_is_not_expected();
     m_used_expectations++;
 }
 
 i2c_result_t i2c_write_byte (uint8_t byte)
 {
+    fail_when(too_many_operations(), "Too many operations");
     store_current_action(write_byte, byte, 0);
-    fail_when(operation_is_not_expected(), "Unexpected operation 'write_byte'");
+    fail_when_operation_is_not_expected();
     fail_when(data_is_not_expected(), "Unexpected data");
-    m_used_expectations++;
-    return m_expectations[m_used_expectations].result;
+    return m_expectations[m_used_expectations++].result;
 }
 
 i2c_result_t i2c_read_byte (uint8_t* byte, uint8_t send_ack)
@@ -163,12 +177,49 @@ static void fail_when(int condition, const char* message)
     }
 }
 
-static int operation_is_not_expected(void)
+static void fail_when_operation_is_not_expected(void)
 {
-    return (m_current_action.operation != m_expectations[m_used_expectations].operation);
+    if (m_current_action.operation != m_expectations[m_used_expectations].operation)
+    {
+        char message[100];
+        const char* expected;
+        const char* actual;
+
+        actual = get_operation_string(m_current_action.operation);
+        expected = get_operation_string(m_expectations[m_used_expectations].operation);
+        sprintf(message, "Operation failure in step %i. Expected: %s, Actual: %s",
+                m_used_expectations+1, expected, actual);
+
+        TEST_FAIL_MESSAGE(message);
+    }
+}
+
+static const char* get_operation_string(operation_t operation)
+{
+    switch (operation)
+    {
+        case start:
+            return operation_string_start;
+        case restart:
+            return operation_string_restart;
+        case stop:
+            return operation_string_stop;
+        case write_byte:
+            return operation_string_write_byte;
+        case read_byte_ack:
+            return operation_string_read_byte_ack;
+        case read_byte_nack:
+            return operation_string_read_byte_nack;
+    }
+    return operation_string_unknown;
 }
 
 static int data_is_not_expected(void)
 {
     return (m_current_action.data != m_expectations[m_used_expectations].data);
+}
+
+static int too_many_operations(void)
+{
+    return (m_used_expectations == m_stored_expectations);
 }
