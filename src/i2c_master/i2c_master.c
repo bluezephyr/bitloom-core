@@ -151,8 +151,12 @@ void i2c_master_run (void)
 
             case write_data_state:
                 result = i2c_write_byte (self.buffer[self.handled_bytes++]);
-
-                if (self.handled_bytes == self.buffer_len)
+                if (result == i2c_nack_received)
+                {
+                    // Slave reports error
+                    self.state = error_state;
+                }
+                else if (self.handled_bytes == self.buffer_len)
                 {
                     // All bytes written -- stop
                     self.state = stop_state;
