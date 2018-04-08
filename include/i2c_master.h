@@ -6,13 +6,6 @@
  * interrupts are used, the communication is done using busy wait.  The driver
  * uses the I2C functions provided in the HAL.
  *
- * TODO:
- * - Add an error status value and two functions: get_error and reset.  The I2C
- *  functionality will not be resumed until the reset function has been called.
- *
- * - Add current user of the driver. Store this value if an error occurs to
- *   make it possible to evaluate which I2C communication that failed.
- *
  * Copyright (c) 2016-2018 BlueZephyr
  *
  * This software may be modified and distributed under the terms
@@ -30,9 +23,7 @@
  *
  * idle:    The driver is available and ready to be used.
  * busy:    The driver is currently performing an operation.
- * error:   The driver has encountered an error and stopped.  Before the i2c
- *          driver will accept any new read or write commands, the reset
- *          function must be called.
+ * error:   The driver has encountered an error and stopped.
  */
 typedef enum
 {
@@ -62,7 +53,7 @@ i2c_master_state_t i2c_master_get_state (void);
  * that the provided data buffers are not modified by the application until the
  * operation has completed.
  *
- * Note that if the driver will ignore any requests if it is not in the idle
+ * Note that if the driver will ignore any requests if it is in the busy
  * state.  In that case, no data will be copied.
  */
 
@@ -82,8 +73,7 @@ void i2c_master_write (uint8_t address, uint8_t* buffer, uint16_t len);
  * state.  The run function must then be called repeatedly until the operation
  * has been finished.  The run function will then put the driver in idle state
  * and it is then ready to process a new read or write command.  If an error
- * occur, the driver is put in the error state and needs to be reset by a call
- * to the reset function.
+ * occur, the driver is put in the error state.
  */
 void i2c_master_run (void);
 

@@ -35,6 +35,8 @@ TEST_GROUP_RUNNER(i2c_master)
     RUN_TEST_CASE(i2c_master, no_device_error);
     RUN_TEST_CASE(i2c_master, write_register_not_available);
     RUN_TEST_CASE(i2c_master, write_single_register_on_device);
+    RUN_TEST_CASE(i2c_master, write_not_accepted_in_busy_state);
+    RUN_TEST_CASE(i2c_master, successful_write_after_failure);
 }
 
 TEST_SETUP(i2c_master)
@@ -48,12 +50,29 @@ TEST_TEAR_DOWN(i2c_master)
     i2c_mock_destroy();
 }
 
-void check_driver_idle(void)
+/*
+ * Local help fúnctions
+ */
+static void check_driver_idle(void)
 {
     TEST_ASSERT_EQUAL_INT(i2c_idle, i2c_master_get_state());
 }
 
-void run_until(i2c_master_state_t state, uint16_t max_number_of_loops)
+static void check_driver_busy(void)
+{
+    TEST_ASSERT_EQUAL_INT(i2c_busy, i2c_master_get_state());
+}
+
+static void run_number_of_loops(uint16_t number_of_loops)
+{
+    uint16_t i;
+    for(i=0; i<number_of_loops; i++)
+    {
+        i2c_master_run();
+    }
+}
+
+static void run_until(i2c_master_state_t state, uint16_t max_number_of_loops)
 {
     uint16_t i;
     while (i2c_master_get_state() != state)
@@ -83,7 +102,7 @@ TEST(i2c_master, run_driver_idle)
 TEST(i2c_master, write_request_sets_driver_in_busy_state)
 {
     i2c_master_write(0, NULL, 0);
-    TEST_ASSERT_EQUAL_INT(i2c_busy, i2c_master_get_state());
+    check_driver_busy();
 }
 
 TEST(i2c_master, no_device_error)
@@ -123,6 +142,46 @@ TEST(i2c_master, write_single_register_on_device)
     i2c_mock_expect_write_byte_then_return(buffer[0], i2c_ack_received);
     i2c_mock_expect_write_byte_then_return(buffer[1], i2c_ack_received);
     i2c_mock_expect_stop();
+    i2c_master_write(DEVICE_ADDRESS, buffer, buffer_len);
+    run_until(i2c_idle, 10);
+    i2c_mock_verify_complete();
+}
+
+TEST(i2c_master, write_not_accepted_in_busy_state)
+{
+    uint8_t buffer[2] = {WRITE_REGISTER, WRITE_DATA_BYTE_0};
+    uint16_t buffer_len = 2;
+
+    i2c_mock_expect_start_then_return(i2c_ok);
+    i2c_mock_expect_write_byte_then_return(WRITE_ADDRESS, i2c_ack_received);
+    i2c_mock_expect_write_byte_then_return(buffer[0], i2c_ack_received);
+    i2c_mock_expect_write_byte_then_return(buffer[1], i2c_ack_received);
+    i2c_mock_expect_stop();
+    i2c_master_write(DEVICE_ADDRESS, buffer, buffer_len);
+    run_number_of_loops(3);
+
+    // The following write should not generate any operations
+    i2c_master_write(DEVICE_ADDRESS, buffer, buffer_len);
+    run_until(i2c_idle, 10);
+    i2c_mock_verify_complete();
+}
+
+TEST(i2c_master, successful_write_after_failure)
+{
+    uint8_t buffer[2] = {WRITE_REGISTER, WRITE_DATA_BYTE_0};
+    uint16_t buffer_len = 2;
+
+    i2c_mock_expect_start_then_return(i2c_ok);
+    i2c_mock_expect_write_byte_then_return(WRITE_ADDRESS, i2c_nack_received);
+    i2c_mock_expect_stop();
+    i2c_mock_expect_start_then_return(i2c_ok);
+    i2c_mock_expect_write_byte_then_return(WRITE_ADDRESS, i2c_ack_received);
+    i2c_mock_expect_write_byte_then_return(buffer[0], i2c_ack_received);
+    i2c_mock_expect_write_byte_then_return(buffer[1], i2c_ack_received);
+    i2c_mock_expect_stop();
+
+    i2c_master_write(DEVICE_ADDRESS, buffer, buffer_len);
+    run_until(i2c_error, 10);
     i2c_master_write(DEVICE_ADDRESS, buffer, buffer_len);
     run_until(i2c_idle, 10);
     i2c_mock_verify_complete();

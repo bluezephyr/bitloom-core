@@ -57,7 +57,7 @@ static i2c_mock_t self;
  */
 static void store_expectation(operation_t op, i2c_result_t result, uint8_t data, uint8_t read_byte);
 static void store_current_action(operation_t op, uint8_t data, uint8_t read_byte);
-static void fail_when_string_is_not_expected(void);
+static void fail_when_operation_is_not_expected(void);
 static void fail_when(int condition, const char* message);
 static int data_is_not_expected(void);
 static int too_many_operations(void);
@@ -143,7 +143,7 @@ i2c_result_t i2c_start (void)
 {
     fail_when(too_many_operations(), string_too_many_operations);
     store_current_action(start, 0, 0);
-    fail_when_string_is_not_expected();
+    fail_when_operation_is_not_expected();
     return self.expectations[self.used_expectations++].result;
 }
 
@@ -151,7 +151,7 @@ i2c_result_t i2c_restart (void)
 {
     fail_when(too_many_operations(), string_too_many_operations);
     store_current_action(restart, 0, 0);
-    fail_when_string_is_not_expected();
+    fail_when_operation_is_not_expected();
     return self.expectations[self.used_expectations++].result;
 }
 
@@ -159,7 +159,7 @@ void i2c_stop (void)
 {
     fail_when(too_many_operations(), string_too_many_operations);
     store_current_action(stop, 0, 0);
-    fail_when_string_is_not_expected();
+    fail_when_operation_is_not_expected();
     self.used_expectations++;
 }
 
@@ -167,7 +167,7 @@ i2c_result_t i2c_write_byte (uint8_t byte)
 {
     fail_when(too_many_operations(), string_too_many_operations);
     store_current_action(write_byte, byte, 0);
-    fail_when_string_is_not_expected();
+    fail_when_operation_is_not_expected();
     fail_when(data_is_not_expected(), string_unexpected_data);
     return self.expectations[self.used_expectations++].result;
 }
@@ -192,7 +192,7 @@ static void fail_when(int condition, const char* message)
     }
 }
 
-static void fail_when_string_is_not_expected(void)
+static void fail_when_operation_is_not_expected(void)
 {
     if (self.current_action.operation != self.expectations[self.used_expectations].operation)
     {

@@ -105,7 +105,7 @@ i2c_master_state_t i2c_master_get_state (void)
 
 void i2c_master_write (uint8_t address, uint8_t* buffer, uint16_t len)
 {
-    if (self.state == idle_state)
+    if (i2c_master_get_state() != i2c_busy)
     {
         // Store the input data
         self.slave_address = address;
@@ -123,6 +123,11 @@ void i2c_master_run (void)
 {
     uint8_t bytes_this_tick = 0;
     i2c_result_t result;
+
+    if (self.state == error_state)
+    {
+        return;
+    }
 
     while (bytes_this_tick < I2C_BYTES_PER_TICK)
     {
@@ -179,10 +184,9 @@ void i2c_master_run (void)
 
             case error_state:
                 /*
-                 * Stop and return
+                 * Should not happen
                  */
-                i2c_stop();
-                return;
+                break;
         }
         bytes_this_tick++;
 
@@ -190,6 +194,12 @@ void i2c_master_run (void)
             (result == i2c_operation_error))
         {
             self.state = error_state;
+        }
+
+        if (self.state == error_state)
+        {
+            i2c_stop();
+            return;
         }
     }
 }
