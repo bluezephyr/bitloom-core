@@ -66,13 +66,9 @@ i2c_result_t i2c_write_byte (uint8_t byte);
 
 /*
  * Read one byte from from a device on the bus.  The send_ack parameter is used
- * to indicate whether the master should signal ACK or NACK to the slave.  The
- * value of the read byte is stored in the byte parameter.  Note that the value
- * is only valid if the function returns ok.
- *
- * The bus must have been started and the device should have been set in read
- * mode before the functions can be used.
+ * to indicate whether the master should signal ACK (1) or NACK (0) to the
+ * slave.  The value of the read byte is returned.
  */
-i2c_result_t i2c_read_byte (uint8_t* byte, uint8_t send_ack);
+uint8_t i2c_read_byte (uint8_t send_ack);
 
 #endif // BL_HAL_I2C_H

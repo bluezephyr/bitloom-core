@@ -66,6 +66,16 @@ i2c_master_state_t i2c_master_get_state (void);
 void i2c_master_write (uint8_t address, uint8_t* buffer, uint16_t len);
 
 /*
+ * Function to read the specified number of bytes from a device on the I2C bus.
+ * The address is the 7 bit I2C address.  The caller specifies the register to
+ * be read and the driver will read the data and store it in the provided
+ * buffer.  It is the responsibility of the caller to allocate memory for the
+ * buffer.
+ */
+void i2c_master_read_register (uint8_t address, uint8_t read_register,
+                               uint8_t* buffer, uint16_t len);
+
+/*
  * Function used by the BitLoom scheduler to process the read and write
  * commands.  The run function reads and/or writes a few bytes on the bus each
  * tick.  The number of bytes can be configured.  When a read or write

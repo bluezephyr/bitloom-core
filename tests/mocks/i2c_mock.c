@@ -32,7 +32,6 @@ typedef struct
 {
     operation_t operation;
     uint8_t data;
-    uint8_t read_byte;
     i2c_result_t result;
 } action_t;
 
@@ -55,8 +54,8 @@ static i2c_mock_t self;
 /*
  * Local function prototypes.
  */
-static void store_expectation(operation_t op, i2c_result_t result, uint8_t data, uint8_t read_byte);
-static void store_current_action(operation_t op, uint8_t data, uint8_t read_byte);
+static void store_expectation(operation_t op, i2c_result_t result, uint8_t data);
+static void store_current_action(operation_t op, uint8_t data);
 static void fail_when_operation_is_not_expected(void);
 static void fail_when(int condition, const char* message);
 static int data_is_not_expected(void);
@@ -105,32 +104,43 @@ void i2c_mock_verify_complete(void)
 
 void i2c_mock_expect_start_then_return(i2c_result_t result)
 {
-    store_expectation(start, result, 0, 0);
+    store_expectation(start, result, 0);
 }
 
 void i2c_mock_expect_restart_then_return(i2c_result_t result)
 {
-    store_expectation(restart, result, 0, 0);
+    store_expectation(restart, result, 0);
 }
 
 void i2c_mock_expect_stop(void)
 {
-    store_expectation(stop, i2c_ok, 0, 0);
+    store_expectation(stop, i2c_ok, 0);
 }
 
 void i2c_mock_expect_write_byte_then_return(uint8_t byte, i2c_result_t result)
 {
-    store_expectation(write_byte, result, byte, 0);
+    store_expectation(write_byte, result, byte);
 }
 
-static void store_expectation(operation_t op, i2c_result_t result, uint8_t data, uint8_t read_byte)
+void i2c_mock_expect_read_byte_send_ack_then_return(uint8_t byte)
+{
+    // Note that "result" is not applicable here; use i2c_ok as dummy value
+    store_expectation(read_byte_ack, i2c_ok, byte);
+}
+
+void i2c_mock_expect_read_byte_send_nack_then_return(uint8_t byte)
+{
+    // Note that "result" is not applicable here; use i2c_ok as dummy value
+    store_expectation(read_byte_nack, i2c_ok, byte);
+}
+
+static void store_expectation(operation_t op, i2c_result_t result, uint8_t data)
 {
     action_t expectation;
 
     expectation.operation = op;
     expectation.data = data;
     expectation.result = result;
-    expectation.read_byte = read_byte;
 
     self.expectations[self.stored_expectations] = expectation;
     self.stored_expectations++;
@@ -142,7 +152,7 @@ static void store_expectation(operation_t op, i2c_result_t result, uint8_t data,
 i2c_result_t i2c_start (void)
 {
     fail_when(too_many_operations(), string_too_many_operations);
-    store_current_action(start, 0, 0);
+    store_current_action(start, 0);
     fail_when_operation_is_not_expected();
     return self.expectations[self.used_expectations++].result;
 }
@@ -150,7 +160,7 @@ i2c_result_t i2c_start (void)
 i2c_result_t i2c_restart (void)
 {
     fail_when(too_many_operations(), string_too_many_operations);
-    store_current_action(restart, 0, 0);
+    store_current_action(restart, 0);
     fail_when_operation_is_not_expected();
     return self.expectations[self.used_expectations++].result;
 }
@@ -158,7 +168,7 @@ i2c_result_t i2c_restart (void)
 void i2c_stop (void)
 {
     fail_when(too_many_operations(), string_too_many_operations);
-    store_current_action(stop, 0, 0);
+    store_current_action(stop, 0);
     fail_when_operation_is_not_expected();
     self.used_expectations++;
 }
@@ -166,22 +176,34 @@ void i2c_stop (void)
 i2c_result_t i2c_write_byte (uint8_t byte)
 {
     fail_when(too_many_operations(), string_too_many_operations);
-    store_current_action(write_byte, byte, 0);
+    store_current_action(write_byte, byte);
     fail_when_operation_is_not_expected();
     fail_when(data_is_not_expected(), string_unexpected_data);
     return self.expectations[self.used_expectations++].result;
 }
 
-i2c_result_t i2c_read_byte (uint8_t* byte, uint8_t send_ack)
+uint8_t i2c_read_byte (uint8_t send_ack)
 {
-    return i2c_operation_error;
+    operation_t operation;
+
+    if (send_ack)
+    {
+        operation = read_byte_ack;
+    }
+    else
+    {
+        operation = read_byte_nack;
+    }
+    fail_when(too_many_operations(), string_too_many_operations);
+    store_current_action(operation, 0);
+    fail_when_operation_is_not_expected();
+    return self.expectations[self.used_expectations++].data;
 }
 
-static void store_current_action(operation_t op, uint8_t data, uint8_t read_byte)
+static void store_current_action(operation_t op, uint8_t data)
 {
     self.current_action.operation = op;
     self.current_action.data = data;
-    self.current_action.read_byte = read_byte;
 }
 
 static void fail_when(int condition, const char* message)

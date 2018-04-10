@@ -21,5 +21,7 @@ void i2c_mock_expect_start_then_return(i2c_result_t result);
 void i2c_mock_expect_restart_then_return(i2c_result_t result);
 void i2c_mock_expect_stop(void);
 void i2c_mock_expect_write_byte_then_return(uint8_t byte, i2c_result_t result);
+void i2c_mock_expect_read_byte_send_ack_then_return(uint8_t byte);
+void i2c_mock_expect_read_byte_send_nack_then_return(uint8_t byte);
 
 #endif // BL_I2C_MOCK_H

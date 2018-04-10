@@ -16,25 +16,30 @@
 #include "i2c.h"
 
 /*
- * Local defines
+ * Set bit 0 in slave address to indicate read
  */
-// Set bit 0 in slave address to indicate read
 #define I2C_READ_BIT    0x01
 
 /*
- * Current operation state of the i2c master driver.
+ * ACK and NACK for read operations
+ */
+#define I2C_ACK         0x01
+#define I2C_NACK        0x00
+
+/*
+ * Current operation step of the i2c master driver.
  */
 typedef enum
 {
-    idle_state,
-    start_state,
-    write_register_state,
-    restart_in_read_state,
-    read_data_state,
-    write_data_state,
-    stop_state,
-    error_state
-} i2c_operation_state_t;
+    i2c_step_idle,
+    i2c_step_start,
+    i2c_step_write_register,
+    i2c_step_restart_in_read,
+    i2c_step_read_data,
+    i2c_step_write_data,
+    i2c_step_stop,
+    i2c_step_error
+} i2c_operation_step_t;
 
 /*
  * Type of operation that the application has requested.
@@ -51,7 +56,7 @@ typedef enum
  */
 typedef struct
 {
-    i2c_operation_state_t state;
+    i2c_operation_step_t step;
     i2c_operation_t operation;
     uint8_t slave_address;
     uint8_t read_register;
@@ -65,10 +70,9 @@ typedef struct
  */
 static i2c_master_t self;
 
-
 void i2c_master_init (uint8_t taskid)
 {
-    self.state = idle_state;
+    self.step = i2c_step_idle;
     self.operation = write_op;
     self.slave_address = 0;
     self.read_register = 0;
@@ -81,22 +85,22 @@ i2c_master_state_t i2c_master_get_state (void)
 {
     i2c_master_state_t state = i2c_error;
 
-    switch (self.state)
+    switch (self.step)
     {
-        case idle_state:
+        case i2c_step_idle:
             state = i2c_idle;
             break;
 
-        case start_state:
-        case write_register_state:
-        case restart_in_read_state:
-        case read_data_state:
-        case write_data_state:
-        case stop_state:
+        case i2c_step_start:
+        case i2c_step_write_register:
+        case i2c_step_restart_in_read:
+        case i2c_step_read_data:
+        case i2c_step_write_data:
+        case i2c_step_stop:
            state = i2c_busy;
            break;
 
-        case error_state:
+        case i2c_step_error:
            state = i2c_error;
            break;
     }
@@ -113,8 +117,26 @@ void i2c_master_write (uint8_t address, uint8_t* buffer, uint16_t len)
         self.buffer_len = len;
 
         // Prepare write operation. Will be started next tick for the driver
-        self.state = start_state;
+        self.step = i2c_step_start;
         self.operation = write_op;
+        self.handled_bytes = 0;
+    }
+}
+
+void i2c_master_read_register (uint8_t address, uint8_t read_register,
+                               uint8_t* buffer, uint16_t len)
+{
+    if (i2c_master_get_state() != i2c_busy)
+    {
+        // Store the input data
+        self.slave_address = address;
+        self.read_register = read_register;
+        self.buffer = buffer;
+        self.buffer_len = len;
+
+        // Prepare read register operation. Will be started next tick
+        self.step = i2c_step_start;
+        self.operation = read_register_op;
         self.handled_bytes = 0;
     }
 }
@@ -124,67 +146,94 @@ void i2c_master_run (void)
     uint8_t bytes_this_tick = 0;
     i2c_result_t result;
 
-    if (self.state == error_state)
+    if (self.step == i2c_step_error)
     {
         return;
     }
 
     while (bytes_this_tick < I2C_BYTES_PER_TICK)
     {
-        switch (self.state)
+        switch (self.step)
         {
-            case idle_state:
+            case i2c_step_idle:
                 // Nothing to do
                 return;
 
-            case start_state:
+            case i2c_step_start:
                 result = i2c_start();
                 if (result == i2c_ok)
                 {
                     if (self.operation == write_op)
                     {
                         result = i2c_write_byte(self.slave_address);
-                        self.state = write_data_state;
+                        self.step = i2c_step_write_data;
+                    }
+                    else if (self.operation == read_register_op)
+                    {
+                        result = i2c_write_byte(self.slave_address);
+                        self.step = i2c_step_write_register;
                     }
                     if (result == i2c_nack_received)
                     {
                         // Slave not available
-                        self.state = error_state;
+                        self.step = i2c_step_error;
                     }
                 }
                 break;
 
-            case write_data_state:
+            case i2c_step_write_data:
                 result = i2c_write_byte (self.buffer[self.handled_bytes++]);
                 if (result == i2c_nack_received)
                 {
                     // Slave reports error
-                    self.state = error_state;
+                    self.step = i2c_step_error;
                 }
                 else if (self.handled_bytes == self.buffer_len)
                 {
                     // All bytes written -- stop
-                    self.state = stop_state;
+                    self.step = i2c_step_stop;
                 }
                 break;
 
-            case stop_state:
+            case i2c_step_write_register:
+                result = i2c_write_byte (self.read_register);
+                if (result == i2c_nack_received)
+                {
+                    // Slave reports error
+                    self.step = i2c_step_error;
+                }
+                else
+                {
+                    self.step = i2c_step_restart_in_read;
+                }
+                break;
+
+            case i2c_step_restart_in_read:
+                result = i2c_restart();
+                if (result == i2c_ok)
+                {
+                    result = i2c_write_byte(self.slave_address | I2C_READ_BIT);
+                    self.step = i2c_step_read_data;
+                }
+                break;
+
+            case i2c_step_read_data:
+                self.buffer[self.handled_bytes++] = i2c_read_byte(I2C_NACK);
+                self.step = i2c_step_stop;
+                break;
+
+            case i2c_step_stop:
                 /*
                  * Stop the I2C communication and inform the user that the operation has
-                 * finished. Set the I2C module in idle to allow for next operation.
+                 * finished. Set the I2C module in i2c_step_idle to allow for next operation.
                  */
-                self.state = idle_state;
+                self.step = i2c_step_idle;
                 i2c_stop();
                 break;
 
-            case write_register_state:
-            case restart_in_read_state:
-            case read_data_state:
-                break;
-
-            case error_state:
+            case i2c_step_error:
                 /*
-                 * Should not happen
+                 * Errors are caught below
                  */
                 break;
         }
@@ -193,10 +242,10 @@ void i2c_master_run (void)
         if ((result == i2c_arbitration_lost) ||
             (result == i2c_operation_error))
         {
-            self.state = error_state;
+            self.step = i2c_step_error;
         }
 
-        if (self.state == error_state)
+        if (self.step == i2c_step_error)
         {
             i2c_stop();
             return;
