@@ -15,19 +15,17 @@
 /*
  * Defines for a test I2C device
  */
+#define TASK_ID           1
 #define DEVICE_ADDRESS    0x3C
 #define WRITE_ADDRESS     0x3C
 #define READ_ADDRESS      0x3D
 #define READ_REGISTER     0x25
 #define READ_DATA_BYTE_0  0x30
+#define READ_DATA_BYTE_1  0x31
+#define READ_DATA_BYTE_2  0x32
 #define WRITE_REGISTER    0x20
 #define WRITE_DATA_BYTE_0 0x40
 
-/*
- * Tests to be written:
- * - Write long message
- * - Read long register
- */
 
 TEST_GROUP(i2c_master);
 TEST_GROUP_RUNNER(i2c_master)
@@ -41,12 +39,13 @@ TEST_GROUP_RUNNER(i2c_master)
     RUN_TEST_CASE(i2c_master, write_not_accepted_in_busy_state);
     RUN_TEST_CASE(i2c_master, successful_write_after_failure);
     RUN_TEST_CASE(i2c_master, read_not_accepted_in_busy_state);
-    RUN_TEST_CASE(i2c_master, read_one_byte_from_single_register);
+    RUN_TEST_CASE(i2c_master, read_one_byte_from_register);
+    RUN_TEST_CASE(i2c_master, read_several_bytes_from_register);
 }
 
 TEST_SETUP(i2c_master)
 {
-    i2c_master_init(1);
+    i2c_master_init(TASK_ID);
     i2c_mock_create();
 }
 
@@ -213,7 +212,7 @@ TEST(i2c_master, read_not_accepted_in_busy_state)
     i2c_mock_verify_complete();
 }
 
-TEST(i2c_master, read_one_byte_from_single_register)
+TEST(i2c_master, read_one_byte_from_register)
 {
     uint8_t read_buffer[1];
     uint16_t buffer_len = 1;
@@ -229,5 +228,28 @@ TEST(i2c_master, read_one_byte_from_single_register)
     i2c_master_read_register(DEVICE_ADDRESS, READ_REGISTER, read_buffer, buffer_len);
     run_until(i2c_idle, 10);
     TEST_ASSERT_EQUAL_UINT8(read_buffer[0], READ_DATA_BYTE_0);
+    i2c_mock_verify_complete();
+}
+
+TEST(i2c_master, read_several_bytes_from_register)
+{
+    uint8_t read_buffer[3];
+    uint16_t buffer_len = 3;
+
+    i2c_mock_expect_start_then_return(i2c_ok);
+    i2c_mock_expect_write_byte_then_return(WRITE_ADDRESS, i2c_ack_received);
+    i2c_mock_expect_write_byte_then_return(READ_REGISTER, i2c_ack_received);
+    i2c_mock_expect_restart_then_return(i2c_ok);
+    i2c_mock_expect_write_byte_then_return(READ_ADDRESS, i2c_ack_received);
+    i2c_mock_expect_read_byte_send_ack_then_return(READ_DATA_BYTE_0);
+    i2c_mock_expect_read_byte_send_ack_then_return(READ_DATA_BYTE_1);
+    i2c_mock_expect_read_byte_send_nack_then_return(READ_DATA_BYTE_2);
+    i2c_mock_expect_stop();
+
+    i2c_master_read_register(DEVICE_ADDRESS, READ_REGISTER, read_buffer, buffer_len);
+    run_until(i2c_idle, 10);
+    TEST_ASSERT_EQUAL_UINT8(read_buffer[0], READ_DATA_BYTE_0);
+    TEST_ASSERT_EQUAL_UINT8(read_buffer[1], READ_DATA_BYTE_1);
+    TEST_ASSERT_EQUAL_UINT8(read_buffer[2], READ_DATA_BYTE_2);
     i2c_mock_verify_complete();
 }

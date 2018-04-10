@@ -145,6 +145,7 @@ void i2c_master_run (void)
 {
     uint8_t bytes_this_tick = 0;
     i2c_result_t result;
+    uint8_t send_ack;
 
     if (self.step == i2c_step_error)
     {
@@ -218,8 +219,17 @@ void i2c_master_run (void)
                 break;
 
             case i2c_step_read_data:
-                self.buffer[self.handled_bytes++] = i2c_read_byte(I2C_NACK);
-                self.step = i2c_step_stop;
+                if (self.handled_bytes < self.buffer_len - 1)
+                {
+                    send_ack = I2C_ACK;
+                }
+                else
+                {
+                    // Last byte to be read
+                    send_ack = I2C_NACK;
+                    self.step = i2c_step_stop;
+                }
+                self.buffer[self.handled_bytes++] = i2c_read_byte(send_ack);
                 break;
 
             case i2c_step_stop:
