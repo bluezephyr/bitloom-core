@@ -66,6 +66,14 @@ i2c_master_state_t i2c_master_get_state (void);
 void i2c_master_write (uint8_t address, uint8_t* buffer, uint16_t len);
 
 /*
+ * Function to write to a specific register on a device on the I2C bus.
+ * The address is the 7 bit I2C address.  The caller specifies the register to
+ * be written and provides the data.
+ */
+void i2c_master_write_register (uint8_t address, uint8_t write_register,
+                                uint8_t* buffer, uint16_t len);
+
+/*
  * Function to read the specified number of bytes from a device on the I2C bus.
  * The address is the 7 bit I2C address.  The caller specifies the register to
  * be read and the driver will read the data and store it in the provided
