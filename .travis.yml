@@ -1,4 +1,6 @@
 language: c
-before_script: cd tests
+before_script:
+ - git clone https://github.com/ThrowTheSwitch/Unity.git ~/Unity
+ - cd tests
 script: make
 
