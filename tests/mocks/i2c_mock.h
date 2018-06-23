@@ -1,5 +1,5 @@
 /*
- * Mock to test the behviour of the i2c master driver.
+ * Mock to test the behaviour of the i2c master driver.
  *
  * Copyright (c) 2018 BlueZephyr
  *

@@ -10,10 +10,12 @@ SRC    := scheduler.c \
 	  spy_task.c \
           fake_timer.c \
 	  i2c_mock.c \
+	  pin_digital_io_stub.c \
           test_scheduler.c \
 	  test_i2c_master.c \
           test_spy_task.c \
           test_fake_timer.c \
+          test_pin_digital_io.c \
           test_main.c
 
 
@@ -66,6 +68,7 @@ VPATH = $(UNITY_HOME)/src $(UNITY_HOME)/extras/fixture/src\
 	  ../src/i2c_master \
 	  mocks \
 	  scheduler \
+	  pin_digital_io \
           i2c_master
 
 $(NAME) : $(OBJ)

@@ -6,6 +6,7 @@ static void run_tests(void)
     RUN_TEST_GROUP(spy_task);
     RUN_TEST_GROUP(scheduler);
     RUN_TEST_GROUP(i2c_master);
+    RUN_TEST_GROUP(pin_digital_io);
 }
 
 int main(int argc, const char* argv[])
