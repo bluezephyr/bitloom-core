@@ -21,9 +21,9 @@
 bool pin_digital_io_read(uint16_t pin_id);
 
 /*
- * Write a value to the specified PIN.  True indicates PIN high and False
- * indicates PIN low.
+ * Write a value to the specified PIN.
  */
-void pin_digital_io_write(uint16_t pin_id, bool on);
+void pin_digital_io_write_high(uint16_t pin_id);
+void pin_digital_io_write_low(uint16_t pin_id);
 
 #endif // BL_HAL_PIN_DIGITAL_IO_H

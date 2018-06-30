@@ -53,24 +53,24 @@ void check_pin_state(uint16_t pin_id, bool state)
  */
 TEST(pin_digital_io, write_single_pin_true)
 {
-    pin_digital_io_write(PIN_ID_NO_1, true);
+    pin_digital_io_write_high(PIN_ID_NO_1);
     check_written_pin_state(PIN_ID_NO_1, true);
 }
 
 TEST(pin_digital_io, write_single_pin_false)
 {
-    pin_digital_io_write(PIN_ID_NO_1, false);
+    pin_digital_io_write_low(PIN_ID_NO_1);
     check_written_pin_state(PIN_ID_NO_1, false);
 }
 
 TEST(pin_digital_io, read_single_pin_false)
 {
-    pin_digital_io_stub_set_pin_state(PIN_ID_NO_1, false);
+    pin_digital_io_stub_set_pin_state_low(PIN_ID_NO_1);
     check_pin_state(PIN_ID_NO_1, false);
 }
 
 TEST(pin_digital_io, read_single_pin_true)
 {
-    pin_digital_io_stub_set_pin_state(PIN_ID_NO_1, true);
+    pin_digital_io_stub_set_pin_state_high(PIN_ID_NO_1);
     check_pin_state(PIN_ID_NO_1, true);
 }

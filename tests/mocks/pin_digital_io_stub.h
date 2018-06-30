@@ -18,7 +18,8 @@
  * Functions to control the stub
  */
 void pin_digital_io_stub_init(void);
-void pin_digital_io_stub_set_pin_state(uint16_t pin_id, bool on);
+void pin_digital_io_stub_set_pin_state_high(uint16_t pin_id);
+void pin_digital_io_stub_set_pin_state_low(uint16_t pin_id);
 bool pin_digital_io_stub_get_pin_state(uint16_t pin_id);
 
 #endif // BL_PIN_DIGITAL_IO_STUB_H

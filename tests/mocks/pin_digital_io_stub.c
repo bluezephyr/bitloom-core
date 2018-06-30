@@ -27,6 +27,7 @@ static pin_state_t pin_list[MAX_NO_OF_PINS];
  */
 static int16_t find_empty_slot(void);
 static int16_t find_index_for_pin_id(uint16_t pin_id);
+static void pin_digital_io_write(uint16_t pin_id, bool on);
 
 
 /*
@@ -42,22 +43,16 @@ bool pin_digital_io_read(uint16_t pin_id)
     return false;
 }
 
-void pin_digital_io_write(uint16_t pin_id, bool on)
+void pin_digital_io_write_high(uint16_t pin_id)
 {
-    int16_t index;
-
-    if(find_index_for_pin_id(pin_id) < 0)
-    {
-        index = find_empty_slot();
-    }
-
-    if(index >= 0)
-    {
-        pin_list[index].pin_id = pin_id;
-        pin_list[index].on = on;
-        pin_list[index].used = true;
-    }
+    pin_digital_io_write(pin_id, true);
 }
+
+void pin_digital_io_write_low(uint16_t pin_id)
+{
+    pin_digital_io_write(pin_id, false);
+}
+
 
 /*
  * Functions to control the stub
@@ -67,10 +62,14 @@ void pin_digital_io_stub_init(void)
     memset(pin_list, 0, sizeof(pin_list));
 }
 
-void pin_digital_io_stub_set_pin_state(uint16_t pin_id, bool on)
+void pin_digital_io_stub_set_pin_state_high(uint16_t pin_id)
 {
-    // Use stub implementation
-    pin_digital_io_write(pin_id, on);
+    pin_digital_io_write(pin_id, true);
+}
+
+void pin_digital_io_stub_set_pin_state_low(uint16_t pin_id)
+{
+    pin_digital_io_write(pin_id, false);
 }
 
 bool pin_digital_io_stub_get_pin_state(uint16_t pin_id)
@@ -106,4 +105,21 @@ static int16_t find_empty_slot(void)
         }
     }
     return -1;
+}
+
+static void pin_digital_io_write(uint16_t pin_id, bool on)
+{
+    int16_t index;
+
+    if(find_index_for_pin_id(pin_id) < 0)
+    {
+        index = find_empty_slot();
+    }
+
+    if(index >= 0)
+    {
+        pin_list[index].pin_id = pin_id;
+        pin_list[index].on = on;
+        pin_list[index].used = true;
+    }
 }
