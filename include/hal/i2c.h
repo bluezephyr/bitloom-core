@@ -14,6 +14,8 @@
 #ifndef BL_HAL_I2C_H
 #define BL_HAL_I2C_H
 
+#include <stdint.h>
+
 /*
  * Possible result from I2C bus operations:
  *
