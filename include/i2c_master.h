@@ -16,6 +16,7 @@
 #ifndef BL_I2C_MASTER_H
 #define BL_I2C_MASTER_H
 
+#include <stdint.h>
 #include "i2c_master_config.h"
 
 /*
