@@ -144,7 +144,7 @@ void i2c_master_read_register (uint8_t address, uint8_t read_register,
 void i2c_master_run (void)
 {
     uint8_t bytes_this_tick = 0;
-    i2c_result_t result;
+    i2c_result_t result = i2c_ok;
     uint8_t send_ack;
 
     if (self.step == i2c_step_error)
