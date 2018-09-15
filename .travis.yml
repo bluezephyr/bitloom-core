@@ -1,6 +1,15 @@
 language: c
+
+install:
+  - pip install --user cmake
+
 before_script:
- - git clone https://github.com/ThrowTheSwitch/Unity.git ~/Unity
- - cd tests
-script: make
+  - git clone https://github.com/ThrowTheSwitch/Unity.git ~/Unity
+  - mkdir build
+  - cd build
+
+script:
+  - cmake ..
+  - make
+  - ./unit_tests -v
 

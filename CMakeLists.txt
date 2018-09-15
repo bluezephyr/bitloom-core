@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 project(bitloom_core C)
 
 set(CMAKE_C_STANDARD 99)
-set(UNITY_HOME /home/jens/programming/tools/Unity)
+set(UNITY_HOME $ENV{UNITY_HOME})
 
 include_directories(${UNITY_HOME}/src)
 include_directories(${UNITY_HOME}/extras/fixture/src)
