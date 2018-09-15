@@ -44,4 +44,3 @@ set(SOURCE_FILES
         )
 
 add_executable(unit_tests ${SOURCE_FILES} ${HEADER_FILES})
-#add_subdirectory(tests)

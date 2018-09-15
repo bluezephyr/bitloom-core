@@ -28,7 +28,7 @@
 *.dylib
 
 # Executables
-bitloom_unittests
+unit_tests
 *.exe
 *.out
 *.app
@@ -40,3 +40,6 @@ bitloom_unittests
 *.idb
 *.pdb
 
+# Clion
+.idea
+build
