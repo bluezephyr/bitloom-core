@@ -11,5 +11,5 @@ before_script:
 script:
   - cmake ..
   - make
-  - ./unit_tests -v
+  - ./bitloom-core-test -v
 
