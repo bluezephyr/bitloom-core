@@ -13,8 +13,9 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include "i2c_mock.h"
 #include "unity_fixture.h"
+#include "i2c_mock.h"
+
 
 #define MAX_EXPECTATIONS 100
 

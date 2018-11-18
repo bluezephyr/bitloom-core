@@ -11,21 +11,7 @@
 #include "i2c_master.h"
 #include "i2c.h"
 #include "i2c_mock.h"
-
-/*
- * Defines for a test I2C device
- */
-#define TASK_ID           1
-#define DEVICE_ADDRESS    0x3C
-#define WRITE_ADDRESS     0x3C
-#define READ_ADDRESS      0x3D
-#define READ_REGISTER     0x25
-#define READ_DATA_BYTE_0  0x30
-#define READ_DATA_BYTE_1  0x31
-#define READ_DATA_BYTE_2  0x32
-#define WRITE_REGISTER    0x20
-#define WRITE_DATA_BYTE_0 0x40
-
+#include "costumes.h"
 
 TEST_GROUP(i2c_master);
 TEST_GROUP_RUNNER(i2c_master)
@@ -43,8 +29,37 @@ TEST_GROUP_RUNNER(i2c_master)
     RUN_TEST_CASE(i2c_master, read_several_bytes_from_register);
 }
 
+/********************************************************************
+ * Defines for a test I2C device
+ ********************************************************************/
+#define TASK_ID           1
+#define DEVICE_ADDRESS    0x3C
+#define WRITE_ADDRESS     0x3C
+#define READ_ADDRESS      0x3D
+#define READ_REGISTER     0x25
+#define READ_DATA_BYTE_0  0x30
+#define READ_DATA_BYTE_1  0x31
+#define READ_DATA_BYTE_2  0x32
+#define WRITE_REGISTER    0x20
+#define WRITE_DATA_BYTE_0 0x40
+
+
+/********************************************************************
+ * Local help function declarations
+ ********************************************************************/
+static void check_driver_idle(void);
+static void check_driver_busy(void);
+static void run_number_of_loops(uint16_t number_of_loops);
+static void run_until(i2c_master_state_t state, uint16_t max_number_of_loops);
+static void start_write_op_and_set_driver_in_busy_state(void);
+
+
+/********************************************************************
+ * TEST CASES
+ ********************************************************************/
 TEST_SETUP(i2c_master)
 {
+    costumes_create();
     i2c_master_init(TASK_ID);
     i2c_mock_create();
 }
@@ -52,60 +67,9 @@ TEST_SETUP(i2c_master)
 TEST_TEAR_DOWN(i2c_master)
 {
     i2c_mock_destroy();
+    costumes_destroy();
 }
 
-/*
- * Local help functions
- */
-static void check_driver_idle(void)
-{
-    TEST_ASSERT_EQUAL_INT(i2c_idle, i2c_master_get_state());
-}
-
-static void check_driver_busy(void)
-{
-    TEST_ASSERT_EQUAL_INT(i2c_busy, i2c_master_get_state());
-}
-
-static void run_number_of_loops(uint16_t number_of_loops)
-{
-    uint16_t i;
-    for(i=0; i<number_of_loops; i++)
-    {
-        i2c_master_run();
-    }
-}
-
-static void run_until(i2c_master_state_t state, uint16_t max_number_of_loops)
-{
-    uint16_t i;
-    while (i2c_master_get_state() != state)
-    {
-        if (i++ == max_number_of_loops)
-        {
-            TEST_FAIL_MESSAGE("Maximum number of run loops exceeded");
-        }
-        i2c_master_run();
-    }
-}
-
-static void start_write_op_and_set_driver_in_busy_state(void)
-{
-    uint8_t buffer[2] = {WRITE_REGISTER, WRITE_DATA_BYTE_0};
-    uint16_t buffer_len = 2;
-
-    i2c_mock_expect_start_then_return(i2c_ok);
-    i2c_mock_expect_write_byte_then_return(WRITE_ADDRESS, i2c_ack_received);
-    i2c_mock_expect_write_byte_then_return(buffer[0], i2c_ack_received);
-    i2c_mock_expect_write_byte_then_return(buffer[1], i2c_ack_received);
-    i2c_mock_expect_stop();
-    i2c_master_write(DEVICE_ADDRESS, buffer, buffer_len);
-    run_number_of_loops(3);
-}
-
-/*
- * TEST CASES
- */
 TEST(i2c_master, init)
 {
     check_driver_idle();
@@ -253,3 +217,53 @@ TEST(i2c_master, read_several_bytes_from_register)
     TEST_ASSERT_EQUAL_UINT8(read_buffer[2], READ_DATA_BYTE_2);
     i2c_mock_verify_complete();
 }
+
+/********************************************************************
+ * Local help function implementation
+ ********************************************************************/
+static void check_driver_idle(void)
+{
+    TEST_ASSERT_EQUAL_INT(i2c_idle, i2c_master_get_state());
+}
+
+static void check_driver_busy(void)
+{
+    TEST_ASSERT_EQUAL_INT(i2c_busy, i2c_master_get_state());
+}
+
+static void run_number_of_loops(uint16_t number_of_loops)
+{
+    uint16_t i;
+    for(i=0; i<number_of_loops; i++)
+    {
+        i2c_master_run();
+    }
+}
+
+static void run_until(i2c_master_state_t state, uint16_t max_number_of_loops)
+{
+    uint16_t i;
+    while (i2c_master_get_state() != state)
+    {
+        if (i++ == max_number_of_loops)
+        {
+            TEST_FAIL_MESSAGE("Maximum number of run loops exceeded");
+        }
+        i2c_master_run();
+    }
+}
+
+static void start_write_op_and_set_driver_in_busy_state(void)
+{
+    uint8_t buffer[2] = {WRITE_REGISTER, WRITE_DATA_BYTE_0};
+    uint16_t buffer_len = 2;
+
+    i2c_mock_expect_start_then_return(i2c_ok);
+    i2c_mock_expect_write_byte_then_return(WRITE_ADDRESS, i2c_ack_received);
+    i2c_mock_expect_write_byte_then_return(buffer[0], i2c_ack_received);
+    i2c_mock_expect_write_byte_then_return(buffer[1], i2c_ack_received);
+    i2c_mock_expect_stop();
+    i2c_master_write(DEVICE_ADDRESS, buffer, buffer_len);
+    run_number_of_loops(3);
+}
+

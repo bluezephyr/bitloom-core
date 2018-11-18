@@ -3,10 +3,13 @@ project(bitloom_core C)
 
 set(CMAKE_C_STANDARD 99)
 set(UNITY_HOME $ENV{UNITY_HOME})
-add_compile_options(-Wall -Wextra -Wpedantic)
+set(BITLOOM_ROOT ".." CACHE STRING "Root folder for all Bitloom projects")
 
 include_directories(${UNITY_HOME}/src)
 include_directories(${UNITY_HOME}/extras/fixture/src)
+add_subdirectory(${BITLOOM_ROOT}/bitloom-costumes libs)
+
+add_compile_options(-Wall -Wextra -Wpedantic)
 
 set(UNITY_FILES
         ${UNITY_HOME}/extras/fixture/src/unity_fixture.c
@@ -35,4 +38,6 @@ target_include_directories(bitloom-core-test PRIVATE include)
 target_include_directories(bitloom-core-test PRIVATE include/hal)
 target_include_directories(bitloom-core-test PRIVATE tests/config)
 target_include_directories(bitloom-core-test PRIVATE tests/mocks)
+
+target_link_libraries(bitloom-core-test bitloom-costumes)
 

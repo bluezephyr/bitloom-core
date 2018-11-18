@@ -42,4 +42,7 @@ unit_tests
 
 # Clion
 .idea
-build
+
+# CMake
+build*
+cmake-*

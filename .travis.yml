@@ -5,11 +5,12 @@ install:
 
 before_script:
   - git clone https://github.com/ThrowTheSwitch/Unity.git ~/Unity
+  - git clone https://github.com/bluezephyr/bitloom-costumes.git
   - mkdir build
   - cd build
 
 script:
-  - cmake ..
+  - cmake -D BITLOOM_ROOT=~ ..
   - make
   - ./bitloom-core-test -v
 
