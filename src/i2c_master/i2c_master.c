@@ -72,6 +72,7 @@ static i2c_master_t self;
 
 void i2c_master_init (uint8_t taskid)
 {
+    (void)taskid;
     self.step = i2c_step_idle;
     self.operation = write_op;
     self.slave_address = 0;
