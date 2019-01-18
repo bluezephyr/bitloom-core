@@ -8,8 +8,8 @@
  *
  */
 
-#include "timer.h"
-#include "scheduler.h"
+#include "hal/timer.h"
+#include "core/scheduler.h"
 
 typedef struct Task_t
 {

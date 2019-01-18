@@ -9,9 +9,9 @@
  */
 
 #include "unity_fixture.h"
-#include "scheduler.h"
-#include "fake_timer.h"
-#include "spy_task.h"
+#include "core/scheduler.h"
+#include "mocks/fake_timer.h"
+#include "mocks/spy_task.h"
 
 /*
  * Tests to be written:

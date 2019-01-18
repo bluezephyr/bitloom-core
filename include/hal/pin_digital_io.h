@@ -12,6 +12,7 @@
 #ifndef BL_HAL_PIN_DIGITAL_IO_H
 #define BL_HAL_PIN_DIGITAL_IO_H
 
+#include <stdint.h>
 #include <stdbool.h>
 
 /*

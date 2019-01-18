@@ -11,9 +11,9 @@
  *
  */
 
-#include "i2c_master.h"
-#include "i2c_master_config.h"
-#include "i2c.h"
+#include "core/i2c_master.h"
+#include "config/i2c_master_config.h"
+#include "hal/i2c.h"
 
 /*
  * Set bit 0 in slave address to indicate read

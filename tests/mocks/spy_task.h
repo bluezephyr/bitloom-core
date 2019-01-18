@@ -11,7 +11,7 @@
 #ifndef BL_SPY_TASK_H
 #define BL_SPY_TASK_H
 
-#include "scheduler.h"
+#include "core/scheduler.h"
 
 typedef struct
 {

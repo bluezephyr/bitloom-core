@@ -9,7 +9,7 @@
  */
 
 #include "unity_fixture.h"
-#include "fake_timer.h"
+#include "mocks/fake_timer.h"
 
 TEST_GROUP(fake_timer);
 TEST_GROUP_RUNNER(fake_timer)

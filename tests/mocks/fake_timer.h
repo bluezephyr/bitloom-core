@@ -11,7 +11,7 @@
 #ifndef BL_FAKE_TIMER_H
 #define BL_FAKE_TIMER_H
 
-#include "timer.h"
+#include "hal/timer.h"
 
 enum
 {

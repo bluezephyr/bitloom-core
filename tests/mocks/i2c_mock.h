@@ -11,7 +11,7 @@
 #ifndef BL_I2C_MOCK_H
 #define BL_I2C_MOCK_H
 
-#include "i2c.h"
+#include "hal/i2c.h"
 
 void i2c_mock_create(void);
 void i2c_mock_destroy(void);

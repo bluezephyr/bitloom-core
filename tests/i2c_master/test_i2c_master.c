@@ -8,9 +8,9 @@
  *
  */
 #include "unity_fixture.h"
-#include "i2c_master.h"
-#include "i2c.h"
-#include "i2c_mock.h"
+#include "core/i2c_master.h"
+#include "hal/i2c.h"
+#include "mocks/i2c_mock.h"
 #include "costumes.h"
 
 TEST_GROUP(i2c_master);

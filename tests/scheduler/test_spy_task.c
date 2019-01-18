@@ -9,7 +9,7 @@
  */
 
 #include "unity_fixture.h"
-#include "spy_task.h"
+#include "mocks/spy_task.h"
 
 TEST_GROUP(spy_task);
 TEST_GROUP_RUNNER(spy_task)

@@ -17,7 +17,7 @@
 #define BL_I2C_MASTER_H
 
 #include <stdint.h>
-#include "i2c_master_config.h"
+#include "config/i2c_master_config.h"
 
 /*
  * Current state of the I2C driver

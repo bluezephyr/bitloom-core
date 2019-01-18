@@ -18,9 +18,9 @@ set(UNITY_FILES
 
 add_executable(bitloom-core-test
         ${UNITY_FILES}
-        include/scheduler.h
+        include/core/scheduler.h
+        include/core/i2c_master.h
         src/scheduler/scheduler.c
-        include/i2c_master.h
         src/i2c_master/i2c_master.c
         tests/test_main.c
         tests/scheduler/test_fake_timer.c
@@ -35,9 +35,7 @@ add_executable(bitloom-core-test
         )
 
 target_include_directories(bitloom-core-test PRIVATE include)
-target_include_directories(bitloom-core-test PRIVATE include/hal)
-target_include_directories(bitloom-core-test PRIVATE tests/config)
-target_include_directories(bitloom-core-test PRIVATE tests/mocks)
+target_include_directories(bitloom-core-test PRIVATE tests)
 
 target_link_libraries(bitloom-core-test bitloom-costumes)
 

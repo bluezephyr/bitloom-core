@@ -21,7 +21,7 @@
 #define BL_SCHEDULER_H
 
 #include <stdint.h>
-#include "scheduler_config.h"
+#include "config/scheduler_config.h"
 
 #define SCHEDULE_INVALID_TASK_ID    (uint8_t)0xFF
 

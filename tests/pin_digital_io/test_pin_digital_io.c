@@ -11,8 +11,8 @@
  */
 
 #include "unity_fixture.h"
-#include "pin_digital_io_stub.h"
-#include "pin_digital_io.h"
+#include "mocks/pin_digital_io_stub.h"
+#include "hal/pin_digital_io.h"
 
 #define PIN_ID_NO_1     (uint16_t)1
 
