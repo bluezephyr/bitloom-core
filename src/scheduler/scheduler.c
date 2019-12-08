@@ -97,10 +97,10 @@ void schedule_run (void)
     {
         if (tasks[task].time == 0)
         {
-            overrun |= (1 << task);
+            overrun |= (1u << task);
             tasks[task].time = tasks[task].period;
             tasks[task].run();
-            overrun &= ~(1 << task);
+            overrun &= ~(1u << task);
         }
     }
 }
