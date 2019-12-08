@@ -6,6 +6,7 @@ message("CppUTestExt lib: ${CPPUTESTEXTLIB}")
 
 add_executable(scheduler_test
     scheduler/SchedulerTest.cpp
+    mocks/timer_mock.cpp
     mocks/spy_task.c )
 
 target_include_directories(scheduler_test PRIVATE ${CPPUTEST_HOME}/include)

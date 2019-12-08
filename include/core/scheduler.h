@@ -10,7 +10,7 @@
  * The scheduler requires a config.h file with the following defines:
  *  * SCHEDULER_NO_TASKS - Number of tasks in the application (max 32)
  *
- * Copyright (c) 2016-2018 BlueZephyr
+ * Copyright (c) 2016-2020 BlueZephyr
  *
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
@@ -50,22 +50,13 @@ uint32_t schedule_get_overrun_tasks(void);
  * Though, the absolute maximum is 32 (taskid 31).  SCHEDULE_INVALID_TASK_ID
  * will be returned if the add function fails.
  */
-uint8_t schedule_add_task (uint8_t period, uint8_t offset,
-                           task_run run_function);
+uint8_t schedule_add_task (uint8_t period, uint8_t offset, task_run run_function);
 
 /*
  * Start the scheduler.  The scheduler expects that the timer has been
  * configured and initiated.
  */
 void schedule_start (void);
-
-/*
- * Timer tick callback function.  This function shall be called once for every
- * tick (typically every ms).  The function will schedule the tasks that will
- * be run when the schedule_run function is called.  Note that the timer tick
- * function will not execute any code in the tasks.
- */
-void schedule_timer_tick (void);
 
 /*
  * Schedule run function.  This function shall be called repeatedly from main.
