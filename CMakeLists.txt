@@ -12,12 +12,12 @@ set(BITLOOM_ROOT "${CMAKE_CURRENT_SOURCE_DIR}" CACHE STRING "Root folder for Bit
 # for the project's target environment as well as the processor specifics.
 set(BITLOOM_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
-
 add_subdirectory(src/scheduler)
 add_subdirectory(src/i2c_master)
 
 option(COMPILE_TESTS "Compile the tests" OFF)
 if (COMPILE_TESTS)
+    add_compile_options(-Wall -Wextra -Wpedantic -DUNIT_TEST)
     enable_testing()
     add_subdirectory(tests)
 endif(COMPILE_TESTS)

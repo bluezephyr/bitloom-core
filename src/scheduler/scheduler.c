@@ -8,6 +8,7 @@
  *
  */
 
+#include <stdbool.h>
 #include "hal/timer.h"
 #include "core/scheduler.h"
 
@@ -27,6 +28,7 @@ typedef struct Scheduler_t
 {
    Task_t tasks[SCHEDULER_NO_TASKS];
    uint8_t no_of_tasks;
+   uint32_t tick;
    uint32_t overrun;
    uint32_t task_error;
 } Scheduler_t;
@@ -35,9 +37,10 @@ static volatile Scheduler_t self;
 
 void schedule_init (void)
 {
+    self.no_of_tasks = 0;
+    self.tick = 0;
     self.overrun = 0;
     self.task_error = 0;
-    self.no_of_tasks = 0;
 }
 
 uint32_t schedule_get_overrun_tasks(void)
@@ -67,38 +70,34 @@ void schedule_start (void)
 }
 
 /*
- * Callback that updates the task timers.  Typically, this is called once per
- * ms or similar by a timer interrupt.  Each task timer will be decreased by 1.
- * The scheduler's main function will execute the task when the timer reaches 0
- * and reset the task's timer.
+ * Callback that updates the scheduler tick variable.  Typically, this function
+ * is called once per ms or similar by a timer interrupt.
  */
 void schedule_timer_tick (void)
 {
-    uint8_t i;
-
-    if (self.overrun)
-    {
-        // One of the tasks exceeded its execution time
-        self.task_error = self.overrun;
-    }
-
-    // Decrease the current time value for all tasks
-    for (i=0; i<self.no_of_tasks; i++)
-    {
-        if(self.tasks[i].time > 0)
-        {
-            self.tasks[i].time--;
-        }
-    }
+    self.tick++;
 }
 
+extern bool schedule_timer_new_tick(void);
+
+/*
+ * Scheduler main function.  This function waits for a tick and when that happens
+ * it calls the run function of the tasks that are scheduled for that tick.
+ */
 void schedule_run (void)
 {
     uint8_t task;
 
+#ifndef UNIT_TEST
+    while(!self.tick);
+#else
+    while(schedule_timer_new_tick());
+#endif
+    self.tick = 0;
+
     for (task=0; task<self.no_of_tasks; task++)
     {
-        if (self.tasks[task].time == 0)
+        if (--self.tasks[task].time == 0)
         {
             self.overrun |= (1u << task);
             self.tasks[task].time = self.tasks[task].period;
