@@ -4,7 +4,7 @@
  * For more information on the different commands and sequences, consult
  * the I2C specifications.
  *
- * Copyright (c) 2016-2018 BlueZephyr
+ * Copyright (c) 2016-2020 BlueZephyr
  *
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.

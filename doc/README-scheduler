@@ -3,4 +3,4 @@ BitLoom Scheduler
 This is a simple non-preemtive scheduler for BitLoom.
 See the header file for more information.
 
-Copyright (c) 2016-2018 BlueZephyr
+Copyright (c) 2016-2020 BlueZephyr

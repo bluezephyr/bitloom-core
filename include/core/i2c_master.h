@@ -6,7 +6,7 @@
  * interrupts are used, the communication is done using busy wait.  The driver
  * uses the I2C functions provided in the HAL.
  *
- * Copyright (c) 2016-2018 BlueZephyr
+ * Copyright (c) 2016-2020 BlueZephyr
  *
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
