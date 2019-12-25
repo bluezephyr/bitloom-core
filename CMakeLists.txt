@@ -1,41 +1,24 @@
 cmake_minimum_required(VERSION 3.12)
-project(bitloom_core C)
+project(bitloom_core)
 
-set(CMAKE_C_STANDARD 99)
-set(UNITY_HOME $ENV{UNITY_HOME})
-set(BITLOOM_ROOT ".." CACHE STRING "Root folder for all Bitloom projects")
+# The default setting is to expect that all libs are available
+# at the same folder level as the application.  This can be
+# changed by setting the cache variable BITLOOM_ROOT
+# (cmake -D BITLOOM_ROOT=<path> ..)
+# Cache variables can be viewed by "cmake -L"
+set(BITLOOM_ROOT "${CMAKE_CURRENT_SOURCE_DIR}" CACHE STRING "Root folder for Bitloom libs")
 
-include_directories(${UNITY_HOME}/src)
-include_directories(${UNITY_HOME}/extras/fixture/src)
-add_subdirectory(${BITLOOM_ROOT}/bitloom-costumes libs)
+# BITLOOM_CONFIG should be set to the directory containing the configuration
+# for the project's target environment as well as the processor specifics.
+set(BITLOOM_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
-add_compile_options(-Wall -Wextra -Wpedantic)
 
-set(UNITY_FILES
-        ${UNITY_HOME}/extras/fixture/src/unity_fixture.c
-        ${UNITY_HOME}/src/unity.c
-        )
+add_subdirectory(src/scheduler)
+add_subdirectory(src/i2c_master)
 
-add_executable(bitloom-core-test
-        ${UNITY_FILES}
-        include/core/scheduler.h
-        include/core/i2c_master.h
-        src/scheduler/scheduler.c
-        src/i2c_master/i2c_master.c
-        tests/test_main.c
-        tests/scheduler/test_fake_timer.c
-        tests/scheduler/test_scheduler.c
-        tests/scheduler/test_spy_task.c
-        tests/pin_digital_io/test_pin_digital_io.c
-        tests/i2c_master/test_i2c_master.c
-        tests/mocks/fake_timer.c
-        tests/mocks/i2c_mock.c
-        tests/mocks/pin_digital_io_stub.c
-        tests/mocks/spy_task.c
-        )
-
-target_include_directories(bitloom-core-test PRIVATE include)
-target_include_directories(bitloom-core-test PRIVATE tests)
-
-target_link_libraries(bitloom-core-test bitloom-costumes)
+option(COMPILE_TESTS "Compile the tests" OFF)
+if (COMPILE_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif(COMPILE_TESTS)
 

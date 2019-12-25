@@ -1,9 +1,9 @@
 /*
  * Implementation of the spy task module for the unit tests.
  * The module implements a mock task that can be controlled by the test cases
- * to spy on the scheduler's behaviour.
+ * to spy on the scheduler's behavior.
  *
- * Copyright (c) 2018. BlueZephyr
+ * Copyright (c) 2018-2020. BlueZephyr
  *
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
@@ -45,3 +45,4 @@ SpyTask_t spytask_create_overrun_task(uint8_t period, uint8_t offset, task_run r
 {
     return spytask_create(period, offset, run_function);
 }
+
