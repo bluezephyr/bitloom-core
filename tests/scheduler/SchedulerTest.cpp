@@ -29,6 +29,7 @@ TEST_GROUP(scheduler)
 {
     void setup() override
     {
+        timer_init();
         schedule_init();
     }
 
@@ -56,36 +57,15 @@ TEST_GROUP(scheduler)
 
         for (i = 0; i < no_of_times; i++)
         {
-            schedule_timer_tick();
             schedule_run();
         }
     }
 };
 
-/*
- * HELP FUNCTIONS
- */
-void ticker_function(void)
-{
-    schedule_timer_tick();
-}
-
-/*
- * MOCKED INTERFACES USING CPPUTEST MOCKING FRAMEWORK
- */
-void timer_start(void)
-{
-    mock().actualCall("timer_start");
-}
 
 /*
  * TEST CASES
  */
-TEST(scheduler, init_scheduler_no_tasks_overrun)
-{
-    UNSIGNED_LONGS_EQUAL(0, schedule_get_overrun_tasks());
-}
-
 TEST(scheduler, start_scheduler_starts_timer)
 {
     mock().expectOneCall("timer_start");
@@ -96,7 +76,6 @@ TEST(scheduler, schedule_no_tasks)
 {
     mock().ignoreOtherCalls();
     start_tick_run(1);
-    UNSIGNED_LONGS_EQUAL(0, schedule_get_overrun_tasks());
 }
 
 TEST(scheduler, add_one_task)
@@ -157,17 +136,10 @@ TEST(scheduler, schedule_one_task_scheduled_many_offset_one)
     LONGS_EQUAL(2, spytask_get_no_of_runs());
 }
 
-TEST(scheduler, schedule_one_task_overrun)
-{
-    uint8_t task_id;
-    mock().ignoreOtherCalls();
-    SpyTask_t task = spytask_create_overrun_task(1, 0, ticker_function);
-    task_id = schedule_add_task(task.period, task.offset, task.run);
-    start_tick_run(1);
-    UNSIGNED_LONGS_EQUAL(1u << task_id, schedule_get_overrun_tasks());
-}
 
-
+/********************************************************************
+ * TEST RUNNER
+ ********************************************************************/
 int main(int ac, char** av)
 {
     return CommandLineTestRunner::RunAllTests(ac, av);
