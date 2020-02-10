@@ -12,6 +12,7 @@
 #define BL_HAL_UART_H
 
 #include <stdint.h>
+#include "config/uart_config.h"
 
 /*
  * Error codes from UART operations:
