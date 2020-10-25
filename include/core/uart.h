@@ -1,5 +1,5 @@
 /*
- * UART interface in the Hardware abstraction layer (HAL) for BitLoom.
+ * UART driver interface for BitLoom.
  *
  * Copyright (c) 2020 BlueZephyr
  *
@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef BL_HAL_UART_H
-#define BL_HAL_UART_H
+#ifndef BL_UART_H
+#define BL_UART_H
 
 #include <stdint.h>
 #include "config/uart_config.h"
@@ -19,7 +19,7 @@
  */
 
 /*
- * Function to initialize the UART hardware.  This function must be called prior
+ * Function to initialize the UART driver.  This function must be called prior
  * to any other function is called.
  */
 void uart_init (void);
@@ -44,5 +44,5 @@ int8_t uart_read (uint8_t* buffer, int8_t nbytes);
  */
 int8_t uart_write (uint8_t* buffer, int8_t nbytes);
 
-#endif // BL_HAL_UART_H
+#endif // BL_UART_H
 
