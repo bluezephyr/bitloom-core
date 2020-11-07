@@ -28,7 +28,7 @@ void uart_init (void)
     uart_hal_init(&self.inBuffer, &self.outBuffer);
 }
 
-int8_t uart_read (uint8_t* buffer, int8_t nbytes)
+uint16_t uart_read (uint8_t* buffer, uint16_t nbytes)
 {
     (void)nbytes;
     if (!bytebuffer_isEmpty(&self.inBuffer))
@@ -40,11 +40,11 @@ int8_t uart_read (uint8_t* buffer, int8_t nbytes)
     return 0;
 }
 
-int8_t uart_write (uint8_t* buffer, int8_t nbytes)
+uint16_t uart_write (uint8_t* buffer, uint16_t nbytes)
 {
     // Calculate available space in the send buffer
-    int8_t bytesToWrite = bytebuffer_getSpace(&self.outBuffer);
-    int8_t i;
+    uint16_t bytesToWrite = bytebuffer_getSpace(&self.outBuffer);
+    uint16_t i;
 
     if (bytesToWrite > nbytes)
     {
