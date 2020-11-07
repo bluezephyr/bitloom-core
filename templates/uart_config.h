@@ -4,7 +4,7 @@
 /*
  * The UART module uses two byte buffers for incoming and outgoing data.  The sizes of the buffers
  * must be specified.  The buffers are implemented using the bytebuffer module in cutil.  Hence,
- * the sizes must be a power of two.  Maximum size is 128.
+ * the sizes must be a power of two.  Maximum size is 32768.
  */
 
 #define INBUFFER_DATA_SIZE  <set-value>

@@ -33,7 +33,7 @@ void uart_init (void);
  *
  * It is up to the caller to allocate memory for the data in the buffer.
  */
-int8_t uart_read (uint8_t* buffer, int8_t nbytes);
+uint16_t uart_read (uint8_t* buffer, uint16_t nbytes);
 
 /*
  * Write data to UART.
@@ -42,7 +42,7 @@ int8_t uart_read (uint8_t* buffer, int8_t nbytes);
  * The function returns the number of written bytes.  A negative number indicates an error
  * according to the error coded defined.
  */
-int8_t uart_write (uint8_t* buffer, int8_t nbytes);
+uint16_t uart_write (uint8_t* buffer, uint16_t nbytes);
 
 #endif // BL_UART_H
 
