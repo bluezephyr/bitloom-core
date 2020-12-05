@@ -1,7 +1,7 @@
 /*
  * Unit tests for the Bit Loom scheduler.
  *
- * Copyright (c) 2018-2020. BlueZephyr
+ * Copyright (c) 2018-2021. BlueZephyr
  *
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
@@ -9,7 +9,6 @@
  */
 
 #include "CppUTest/CommandLineTestRunner.h"
-#include "CppUTest/TestHarness.h"
 #include "CppUTestExt/MockSupport.h"
 
 extern "C"
@@ -45,7 +44,7 @@ TEST_GROUP(scheduler)
 
         for (i = 0; i < tasks; i++)
         {
-            UNSIGNED_LONGS_EQUAL(i, schedule_add_task(1, 1, NULL));
+            UNSIGNED_LONGS_EQUAL(i, schedule_add_task(1, 1, nullptr));
         }
     }
 
@@ -80,7 +79,7 @@ TEST(scheduler, schedule_no_tasks)
 
 TEST(scheduler, add_one_task)
 {
-    UNSIGNED_LONGS_EQUAL(0, schedule_add_task(1, 1, NULL));
+    UNSIGNED_LONGS_EQUAL(0, schedule_add_task(1, 1, nullptr));
 }
 
 TEST(scheduler, add_max_no_of_tasks)
@@ -91,7 +90,7 @@ TEST(scheduler, add_max_no_of_tasks)
 TEST(scheduler, add_too_many_tasks_returns_error)
 {
     add_no_of_tasks(SCHEDULER_NO_TASKS);
-    UNSIGNED_LONGS_EQUAL(SCHEDULE_INVALID_TASK_ID, schedule_add_task(1, 1, NULL));
+    UNSIGNED_LONGS_EQUAL(SCHEDULE_INVALID_TASK_ID, schedule_add_task(1, 1, nullptr));
 }
 
 TEST(scheduler, schedule_one_task_not_scheduled)

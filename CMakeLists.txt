@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 project(bitloom_core)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_STANDARD 11)
 
 # BITLOOM_CORE must be set to where the bitloom-core repo is located
 set(BITLOOM_CORE ${CMAKE_CURRENT_SOURCE_DIR})
@@ -10,7 +12,6 @@ set(BITLOOM_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 add_compile_options(-Wall -Wextra -Wpedantic -DUNIT_TEST)
 add_subdirectory(src/scheduler)
-add_subdirectory(src/i2c_master)
 
 option(COMPILE_TESTS "Compile the tests" OFF)
 if (COMPILE_TESTS)

@@ -19,19 +19,4 @@ target_link_libraries(scheduler_test
     ${CPPUTESTLIB}
     ${CPPUTESTEXTLIB} )
 
-add_executable(i2c_master_test
-    i2c_master/i2cMasterTest.cpp
-    mocks/i2c_mock.cpp )
-
-target_link_libraries(i2c_master_test
-    i2c_master
-    ${CPPUTESTLIB}
-    ${CPPUTESTEXTLIB} )
-
-target_include_directories(i2c_master_test PRIVATE ${CPPUTEST_HOME}/include)
-target_include_directories(i2c_master_test PRIVATE ${BITLOOM_ROOT}/include)
-target_include_directories(i2c_master_test PRIVATE ${BITLOOM_CONFIG})
-target_include_directories(i2c_master_test PRIVATE mocks)
-
 add_test(scheduler scheduler_test)
-add_test(i2c_master i2c_master_test)
