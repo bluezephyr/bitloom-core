@@ -13,7 +13,7 @@ set(BITLOOM_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 add_compile_options(-Wall -Wextra -Wpedantic -DUNIT_TEST)
 add_subdirectory(src/scheduler)
 
-option(COMPILE_TESTS "Compile the tests" OFF)
+option(COMPILE_TESTS "Compile the tests" ON)
 if (COMPILE_TESTS)
     enable_testing()
     add_subdirectory(tests)
